@@ -192,8 +192,8 @@ struct LiveSessionView: View {
     }
 
     private var stopButtonTitle: String {
-        guard model.isStopping else { return "End Captions" }
-        return model.currentSession?.mode == .saved ? "Saving…" : "Ending…"
+        guard model.isStopping else { return "Stop" }
+        return model.currentSession?.mode == .saved ? "Saving…" : "Stopping…"
     }
 }
 

@@ -74,7 +74,7 @@ final class VoicesInViewUITests: XCTestCase {
         app.buttons["Increase caption size"].tap()
         XCTAssertNotEqual(size.label, originalSize)
 
-        app.buttons["End Captions"].tap()
+        app.buttons["Stop"].tap()
         XCTAssertTrue(startButton.waitForExistence(timeout: 15))
 #endif
     }
