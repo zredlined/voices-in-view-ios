@@ -44,7 +44,12 @@ struct DiagnosticsView: View {
                 label: "Preferred input",
                 value: model.audioCapture.preferredInputName ?? "Automatic"
             )
-            DiagnosticRow(label: "Channels", value: "\(model.audioCapture.routeSnapshot.channelCount)")
+            DiagnosticRow(
+                label: "Channels",
+                value: model.audioCapture.routeSnapshot.channelCount > 0
+                    ? "\(model.audioCapture.routeSnapshot.channelCount)"
+                    : "Not active"
+            )
             DiagnosticRow(
                 label: "Channel names",
                 value: model.audioCapture.routeSnapshot.channelNames.isEmpty
@@ -53,7 +58,9 @@ struct DiagnosticsView: View {
             )
             DiagnosticRow(
                 label: "Sample rate",
-                value: "\(Int(model.audioCapture.routeSnapshot.sampleRate)) Hz"
+                value: model.audioCapture.routeSnapshot.sampleRate > 0
+                    ? "\(Int(model.audioCapture.routeSnapshot.sampleRate)) Hz"
+                    : "Not active"
             )
             DiagnosticRow(
                 label: "Input latency",

@@ -22,6 +22,8 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
     private var hasInstalledInputTap = false
     private var hasConfiguredCategory = false
     private var duplicateChannelEvidence = 0
+    private var negotiatedChannelCount = 0
+    private var negotiatedSampleRate: Double = 0
 
     init() {
         installNotifications()
@@ -88,6 +90,8 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
 
     func stop() {
         isRunning = false
+        negotiatedChannelCount = 0
+        negotiatedSampleRate = 0
         removeInputTapIfInstalled()
         audioEngine.stop()
         frameContinuation?.finish()
@@ -138,6 +142,8 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
         guard inputFormat.sampleRate > 0, inputFormat.channelCount > 0 else {
             throw VoicesInViewError.microphoneUnavailable
         }
+        negotiatedChannelCount = Int(inputFormat.channelCount)
+        negotiatedSampleRate = inputFormat.sampleRate
 
         let frameClock = clock
         let tapBlock = Self.makeTapBlock(
@@ -245,14 +251,17 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
             return trimmed.isEmpty ? "Channel \(channel.channelNumber)" : trimmed
         }
         let reportedChannels = audioSession.inputNumberOfChannels
-        let channelCount = max(reportedChannels, names.count)
+        let channelCount = max(negotiatedChannelCount, max(reportedChannels, names.count))
+        let sampleRate = negotiatedSampleRate > 0
+            ? negotiatedSampleRate
+            : (channelCount > 0 ? audioSession.sampleRate : 0)
 
         return AudioRouteSnapshot(
             inputName: input.portName,
             inputKind: kind,
             channelNames: names,
             channelCount: channelCount,
-            sampleRate: audioSession.sampleRate,
+            sampleRate: sampleRate,
             inputLatency: audioSession.inputLatency,
             ioBufferDuration: audioSession.ioBufferDuration,
             isConnected: true

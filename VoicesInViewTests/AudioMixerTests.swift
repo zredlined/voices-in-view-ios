@@ -3,6 +3,36 @@ import XCTest
 @testable import VoicesInView
 
 final class AudioMixerTests: XCTestCase {
+    func testInactiveInputDoesNotClaimToHaveZeroChannels() {
+        let snapshot = AudioRouteSnapshot(
+            inputName: "iPhone Microphone",
+            inputKind: .builtIn,
+            channelNames: [],
+            channelCount: 0,
+            sampleRate: 0,
+            inputLatency: 0,
+            ioBufferDuration: 0,
+            isConnected: true
+        )
+
+        XCTAssertEqual(snapshot.statusDescription, "Ready · format shown while captioning")
+    }
+
+    func testActiveInputDescribesItsNegotiatedFormat() {
+        let snapshot = AudioRouteSnapshot(
+            inputName: "iPhone Microphone",
+            inputKind: .builtIn,
+            channelNames: ["Channel 1"],
+            channelCount: 1,
+            sampleRate: 48_000,
+            inputLatency: 0.01,
+            ioBufferDuration: 0.02,
+            isConnected: true
+        )
+
+        XCTAssertEqual(snapshot.statusDescription, "1 channel · 48 kHz")
+    }
+
     @MainActor
     func testStoppingAudioCaptureIsSafeBeforeStarting() {
         let capture = AudioCaptureService()

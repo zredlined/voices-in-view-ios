@@ -9,6 +9,11 @@ struct RootView: View {
             if model.isSessionActive || model.isStopping {
                 LiveSessionView()
                     .transition(.opacity)
+            } else if let session = model.completedSession {
+                NavigationStack {
+                    SessionDetailView(session: session, isJustCompleted: true)
+                }
+                .transition(.opacity)
             } else {
                 NavigationStack {
                     HomeView()
@@ -17,6 +22,7 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.18), value: model.isSessionActive)
+        .animation(.easeInOut(duration: 0.18), value: model.completedSession?.id)
         .alert(
             "Voices in View",
             isPresented: Binding(

@@ -47,6 +47,33 @@ final class SessionRepositoryTests: XCTestCase {
         XCTAssertTrue(remainingSessions.isEmpty)
     }
 
+    func testTranscriptShareTextPreservesParagraphsAndSpeakerLabels() {
+        let speaker = AudioChannel(
+            id: UUID(),
+            physicalIndex: 1,
+            label: "Blue Mic — Alice",
+            accent: .blue
+        )
+        let transcript = SessionTranscript(
+            session: CaptionSession(mode: .saved),
+            segments: [
+                segment(text: "Welcome everyone.", isFinal: true),
+                CaptionSegment(
+                    channel: speaker,
+                    startTime: 1,
+                    endTime: 2,
+                    text: "Thanks for coming.",
+                    isFinal: true
+                )
+            ]
+        )
+
+        XCTAssertEqual(
+            transcript.shareText,
+            "Welcome everyone.\n\nBlue Mic — Alice: Thanks for coming."
+        )
+    }
+
     private func segment(text: String, isFinal: Bool) -> CaptionSegment {
         CaptionSegment(
             channel: .group,

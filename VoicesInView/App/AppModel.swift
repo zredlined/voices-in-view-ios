@@ -14,6 +14,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var modelReadiness: ModelReadiness = .checking
     @Published private(set) var visibleSegments: [CaptionSegment] = []
     @Published private(set) var currentSession: CaptionSession?
+    @Published private(set) var completedSession: CaptionSession?
     @Published private(set) var isSessionActive = false
     @Published private(set) var isTestingMicrophones = false
     @Published private(set) var isStarting = false
@@ -90,6 +91,7 @@ final class AppModel: ObservableObject {
             stopMicrophoneTest()
         }
         isStarting = true
+        completedSession = nil
         errorMessage = nil
         routeBanner = nil
         timeline.reset()
@@ -198,6 +200,8 @@ final class AppModel: ObservableObject {
     func stopCaptions() async {
         guard isSessionActive, !isStopping else { return }
         isStopping = true
+        let session = currentSession
+        let endedAt = Date()
         audioCapture.stop()
         await transcriptionEngine.finish()
 
@@ -205,10 +209,14 @@ final class AppModel: ObservableObject {
         captionTask = nil
         await task?.value
 
-        if let session = currentSession, let activeRepository {
-            try? await activeRepository.finish(sessionID: session.id, endedAt: Date())
+        if let session, let activeRepository {
+            do {
+                try await activeRepository.finish(sessionID: session.id, endedAt: endedAt)
+            } catch {
+                errorMessage = error.localizedDescription
+            }
         }
-        if currentSession?.mode == .ghost {
+        if session?.mode == .ghost {
             await ephemeralRepository.removeAll()
         }
 
@@ -218,6 +226,12 @@ final class AppModel: ObservableObject {
         isStopping = false
         UIApplication.shared.isIdleTimerDisabled = false
         await refreshHistory()
+
+        if var session, session.mode == .saved {
+            session.endedAt = endedAt
+            completedSession = (try? await savedRepository.load(sessionID: session.id).session)
+                ?? session
+        }
     }
 
     func loadTranscript(_ session: CaptionSession) async throws -> SessionTranscript {
@@ -227,6 +241,9 @@ final class AppModel: ObservableObject {
     func delete(_ session: CaptionSession) async {
         do {
             try await savedRepository.delete(sessionID: session.id)
+            if completedSession?.id == session.id {
+                completedSession = nil
+            }
             await refreshHistory()
         } catch {
             errorMessage = error.localizedDescription
@@ -248,6 +265,10 @@ final class AppModel: ObservableObject {
 
     func clearError() {
         errorMessage = nil
+    }
+
+    func dismissCompletedSession() {
+        completedSession = nil
     }
 
     private func receive(_ update: CaptionUpdate) async {

@@ -21,6 +21,7 @@ final class VoicesInViewUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Ghost Mode, not saved"].exists)
         XCTAssertTrue(app.buttons["Saved mode"].exists)
         XCTAssertTrue(app.buttons["Check Mic Levels"].exists)
+        XCTAssertTrue(app.buttons["saved-transcripts"].exists)
     }
 
     func testGhostModeIsTheDefault() {
@@ -77,8 +78,7 @@ final class VoicesInViewUITests: XCTestCase {
         XCTAssertFalse(app.alerts["Voices in View"].waitForExistence(timeout: 3))
         XCTAssertEqual(app.state, .runningForeground)
 
-        app.buttons["Stop"].tap()
-        app.buttons["End Session"].tap()
+        app.buttons["End Captions"].tap()
         XCTAssertTrue(startButton.waitForExistence(timeout: 15))
 #endif
     }

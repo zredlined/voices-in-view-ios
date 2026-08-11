@@ -47,6 +47,7 @@ struct AudioRouteSnapshot: Equatable, Sendable {
 
     var statusDescription: String {
         guard isConnected else { return "No microphone available" }
+        guard channelCount > 0 else { return "Ready · format shown while captioning" }
         let format = sampleRate > 0 ? " · \(Int(sampleRate / 1_000)) kHz" : ""
         return "\(channelCount) \(channelCount == 1 ? "channel" : "channels")\(format)"
     }
@@ -171,6 +172,15 @@ struct SessionTranscript: Equatable, Sendable {
 
     var plainText: String {
         segments.map(\.text).joined(separator: " ")
+    }
+
+    var shareText: String {
+        segments.map { segment in
+            segment.channel.id == AudioChannel.group.id
+                ? segment.text
+                : "\(segment.channel.label): \(segment.text)"
+        }
+        .joined(separator: "\n\n")
     }
 }
 

@@ -4,7 +4,6 @@ struct LiveSessionView: View {
     @EnvironmentObject private var model: AppModel
     @ScaledMetric(relativeTo: .title) private var dynamicTypeScale: CGFloat = 1
     @State private var autoScroll = true
-    @State private var confirmStop = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -23,12 +22,6 @@ struct LiveSessionView: View {
             liveControls
         }
         .background(AppTheme.background.ignoresSafeArea())
-        .confirmationDialog("End this caption session?", isPresented: $confirmStop) {
-            Button("End Session", role: .destructive) {
-                Task { await model.stopCaptions() }
-            }
-            Button("Keep Captioning", role: .cancel) {}
-        }
     }
 
     private var liveHeader: some View {
@@ -170,7 +163,7 @@ struct LiveSessionView: View {
             Spacer()
 
             Button(role: .destructive) {
-                confirmStop = true
+                Task { await model.stopCaptions() }
             } label: {
                 HStack(spacing: 8) {
                     if model.isStopping {
@@ -178,14 +171,15 @@ struct LiveSessionView: View {
                     } else {
                         Image(systemName: "stop.fill")
                     }
-                    Text(model.isStopping ? "Finishing…" : "Stop")
+                    Text(stopButtonTitle)
                         .fontWeight(.bold)
                 }
-                .frame(minWidth: 92, minHeight: 48)
+                .frame(minWidth: 132, minHeight: 48)
             }
             .buttonStyle(.borderedProminent)
             .tint(AppTheme.danger)
             .disabled(model.isStopping)
+            .accessibilityHint("Stops listening. Saved sessions open as a transcript.")
         }
         .buttonStyle(.bordered)
         .tint(AppTheme.primaryText)
@@ -193,6 +187,11 @@ struct LiveSessionView: View {
         .padding(.vertical, 12)
         .background(AppTheme.card)
         .overlay(alignment: .top) { Divider().overlay(AppTheme.cardBorder) }
+    }
+
+    private var stopButtonTitle: String {
+        guard model.isStopping else { return "End Captions" }
+        return model.currentSession?.mode == .saved ? "Saving…" : "Ending…"
     }
 }
 
