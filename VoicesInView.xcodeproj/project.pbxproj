@@ -1,0 +1,530 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000001 /* App/VoicesInViewApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* App/VoicesInViewApp.swift */; };
+		A10000000000000000000002 /* App/AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* App/AppModel.swift */; };
+		A10000000000000000000003 /* Models/CaptionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000003 /* Models/CaptionModels.swift */; };
+		A10000000000000000000004 /* Architecture/Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* Architecture/Protocols.swift */; };
+		A10000000000000000000005 /* Speech/CaptionTimelineReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* Speech/CaptionTimelineReducer.swift */; };
+		A10000000000000000000006 /* Speech/AppleSpeechEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* Speech/AppleSpeechEngine.swift */; };
+		A10000000000000000000007 /* Audio/AudioMixer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* Audio/AudioMixer.swift */; };
+		A10000000000000000000008 /* Audio/AudioCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000008 /* Audio/AudioCaptureService.swift */; };
+		A10000000000000000000009 /* Storage/SessionRepositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* Storage/SessionRepositories.swift */; };
+		A1000000000000000000000A /* Diagnostics/ProcessDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000A /* Diagnostics/ProcessDiagnostics.swift */; };
+		A1000000000000000000000B /* UI/Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000B /* UI/Theme.swift */; };
+		A1000000000000000000000C /* UI/Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000C /* UI/Components.swift */; };
+		A1000000000000000000000D /* UI/RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* UI/RootView.swift */; };
+		A1000000000000000000000E /* UI/HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000E /* UI/HomeView.swift */; };
+		A1000000000000000000000F /* UI/LiveSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* UI/LiveSessionView.swift */; };
+		A10000000000000000000010 /* UI/HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* UI/HistoryView.swift */; };
+		A10000000000000000000011 /* UI/DiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* UI/DiagnosticsView.swift */; };
+		A10000000000000000000013 /* Resources/PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000013 /* Resources/PrivacyInfo.xcprivacy */; };
+		A10000000000000000000020 /* CaptionTimelineReducerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* CaptionTimelineReducerTests.swift */; };
+		A10000000000000000000021 /* AudioMixerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000021 /* AudioMixerTests.swift */; };
+		A10000000000000000000022 /* SessionRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000022 /* SessionRepositoryTests.swift */; };
+		A10000000000000000000023 /* VoicesInViewUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000023 /* VoicesInViewUITests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C10000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D10000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E10000000000000000000001;
+			remoteInfo = VoicesInView;
+		};
+		C10000000000000000000002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D10000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E10000000000000000000001;
+			remoteInfo = VoicesInView;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		B10000000000000000000001 /* App/VoicesInViewApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/VoicesInViewApp.swift; sourceTree = "<group>"; };
+		B10000000000000000000002 /* App/AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/AppModel.swift; sourceTree = "<group>"; };
+		B10000000000000000000003 /* Models/CaptionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models/CaptionModels.swift; sourceTree = "<group>"; };
+		B10000000000000000000004 /* Architecture/Protocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Architecture/Protocols.swift; sourceTree = "<group>"; };
+		B10000000000000000000005 /* Speech/CaptionTimelineReducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speech/CaptionTimelineReducer.swift; sourceTree = "<group>"; };
+		B10000000000000000000006 /* Speech/AppleSpeechEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speech/AppleSpeechEngine.swift; sourceTree = "<group>"; };
+		B10000000000000000000007 /* Audio/AudioMixer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audio/AudioMixer.swift; sourceTree = "<group>"; };
+		B10000000000000000000008 /* Audio/AudioCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audio/AudioCaptureService.swift; sourceTree = "<group>"; };
+		B10000000000000000000009 /* Storage/SessionRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage/SessionRepositories.swift; sourceTree = "<group>"; };
+		B1000000000000000000000A /* Diagnostics/ProcessDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagnostics/ProcessDiagnostics.swift; sourceTree = "<group>"; };
+		B1000000000000000000000B /* UI/Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI/Theme.swift; sourceTree = "<group>"; };
+		B1000000000000000000000C /* UI/Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI/Components.swift; sourceTree = "<group>"; };
+		B1000000000000000000000D /* UI/RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI/RootView.swift; sourceTree = "<group>"; };
+		B1000000000000000000000E /* UI/HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI/HomeView.swift; sourceTree = "<group>"; };
+		B1000000000000000000000F /* UI/LiveSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI/LiveSessionView.swift; sourceTree = "<group>"; };
+		B10000000000000000000010 /* UI/HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI/HistoryView.swift; sourceTree = "<group>"; };
+		B10000000000000000000011 /* UI/DiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI/DiagnosticsView.swift; sourceTree = "<group>"; };
+		B10000000000000000000012 /* Resources/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources/Assets.xcassets; sourceTree = "<group>"; };
+		B10000000000000000000013 /* Resources/PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Resources/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		B10000000000000000000014 /* Resources/Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Resources/Info.plist; sourceTree = "<group>"; };
+		B10000000000000000000020 /* CaptionTimelineReducerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptionTimelineReducerTests.swift; sourceTree = "<group>"; };
+		B10000000000000000000021 /* AudioMixerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioMixerTests.swift; sourceTree = "<group>"; };
+		B10000000000000000000022 /* SessionRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRepositoryTests.swift; sourceTree = "<group>"; };
+		B10000000000000000000023 /* VoicesInViewUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoicesInViewUITests.swift; sourceTree = "<group>"; };
+		B10000000000000000000030 /* VoicesInView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoicesInView.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000031 /* VoicesInViewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VoicesInViewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000032 /* VoicesInViewUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VoicesInViewUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F10000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F10000000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F10000000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		G10000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				G10000000000000000000002 /* VoicesInView */,
+				G10000000000000000000003 /* VoicesInViewTests */,
+				G10000000000000000000005 /* VoicesInViewUITests */,
+				G10000000000000000000004 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		G10000000000000000000002 /* VoicesInView */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000001 /* App/VoicesInViewApp.swift */,
+				B10000000000000000000002 /* App/AppModel.swift */,
+				B10000000000000000000003 /* Models/CaptionModels.swift */,
+				B10000000000000000000004 /* Architecture/Protocols.swift */,
+				B10000000000000000000005 /* Speech/CaptionTimelineReducer.swift */,
+				B10000000000000000000006 /* Speech/AppleSpeechEngine.swift */,
+				B10000000000000000000007 /* Audio/AudioMixer.swift */,
+				B10000000000000000000008 /* Audio/AudioCaptureService.swift */,
+				B10000000000000000000009 /* Storage/SessionRepositories.swift */,
+				B1000000000000000000000A /* Diagnostics/ProcessDiagnostics.swift */,
+				B1000000000000000000000B /* UI/Theme.swift */,
+				B1000000000000000000000C /* UI/Components.swift */,
+				B1000000000000000000000D /* UI/RootView.swift */,
+				B1000000000000000000000E /* UI/HomeView.swift */,
+				B1000000000000000000000F /* UI/LiveSessionView.swift */,
+				B10000000000000000000010 /* UI/HistoryView.swift */,
+				B10000000000000000000011 /* UI/DiagnosticsView.swift */,
+				B10000000000000000000012 /* Resources/Assets.xcassets */,
+				B10000000000000000000013 /* Resources/PrivacyInfo.xcprivacy */,
+				B10000000000000000000014 /* Resources/Info.plist */,
+			);
+			path = VoicesInView;
+			sourceTree = "<group>";
+		};
+		G10000000000000000000003 /* VoicesInViewTests */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000020 /* CaptionTimelineReducerTests.swift */,
+				B10000000000000000000021 /* AudioMixerTests.swift */,
+				B10000000000000000000022 /* SessionRepositoryTests.swift */,
+			);
+			path = VoicesInViewTests;
+			sourceTree = "<group>";
+		};
+		G10000000000000000000004 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000030 /* VoicesInView.app */,
+				B10000000000000000000031 /* VoicesInViewTests.xctest */,
+				B10000000000000000000032 /* VoicesInViewUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		G10000000000000000000005 /* VoicesInViewUITests */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000023 /* VoicesInViewUITests.swift */,
+			);
+			path = VoicesInViewUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E10000000000000000000001 /* VoicesInView */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = H10000000000000000000001 /* Build configuration list for PBXNativeTarget "VoicesInView" */;
+			buildPhases = (
+				I10000000000000000000001 /* Sources */,
+				F10000000000000000000001 /* Frameworks */,
+				J10000000000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VoicesInView;
+			productName = VoicesInView;
+			productReference = B10000000000000000000030 /* VoicesInView.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E10000000000000000000002 /* VoicesInViewTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = H10000000000000000000002 /* Build configuration list for PBXNativeTarget "VoicesInViewTests" */;
+			buildPhases = (
+				I10000000000000000000002 /* Sources */,
+				F10000000000000000000002 /* Frameworks */,
+				J10000000000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				K10000000000000000000001 /* PBXTargetDependency */,
+			);
+			name = VoicesInViewTests;
+			productName = VoicesInViewTests;
+			productReference = B10000000000000000000031 /* VoicesInViewTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		E10000000000000000000003 /* VoicesInViewUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = H10000000000000000000003 /* Build configuration list for PBXNativeTarget "VoicesInViewUITests" */;
+			buildPhases = (
+				I10000000000000000000003 /* Sources */,
+				F10000000000000000000003 /* Frameworks */,
+				J10000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				K10000000000000000000002 /* PBXTargetDependency */,
+			);
+			name = VoicesInViewUITests;
+			productName = VoicesInViewUITests;
+			productReference = B10000000000000000000032 /* VoicesInViewUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D10000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {
+					E10000000000000000000001 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					E10000000000000000000002 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = E10000000000000000000001;
+					};
+					E10000000000000000000003 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = E10000000000000000000001;
+					};
+				};
+			};
+			buildConfigurationList = H10000000000000000000000 /* Build configuration list for PBXProject "VoicesInView" */;
+			compatibilityVersion = "Xcode 15.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = G10000000000000000000001;
+			productRefGroup = G10000000000000000000004 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E10000000000000000000001 /* VoicesInView */,
+				E10000000000000000000002 /* VoicesInViewTests */,
+				E10000000000000000000003 /* VoicesInViewUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		J10000000000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000013 /* Resources/PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		J10000000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		J10000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		I10000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000001 /* App/VoicesInViewApp.swift in Sources */,
+				A10000000000000000000002 /* App/AppModel.swift in Sources */,
+				A10000000000000000000003 /* Models/CaptionModels.swift in Sources */,
+				A10000000000000000000004 /* Architecture/Protocols.swift in Sources */,
+				A10000000000000000000005 /* Speech/CaptionTimelineReducer.swift in Sources */,
+				A10000000000000000000006 /* Speech/AppleSpeechEngine.swift in Sources */,
+				A10000000000000000000007 /* Audio/AudioMixer.swift in Sources */,
+				A10000000000000000000008 /* Audio/AudioCaptureService.swift in Sources */,
+				A10000000000000000000009 /* Storage/SessionRepositories.swift in Sources */,
+				A1000000000000000000000A /* Diagnostics/ProcessDiagnostics.swift in Sources */,
+				A1000000000000000000000B /* UI/Theme.swift in Sources */,
+				A1000000000000000000000C /* UI/Components.swift in Sources */,
+				A1000000000000000000000D /* UI/RootView.swift in Sources */,
+				A1000000000000000000000E /* UI/HomeView.swift in Sources */,
+				A1000000000000000000000F /* UI/LiveSessionView.swift in Sources */,
+				A10000000000000000000010 /* UI/HistoryView.swift in Sources */,
+				A10000000000000000000011 /* UI/DiagnosticsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		I10000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000020 /* CaptionTimelineReducerTests.swift in Sources */,
+				A10000000000000000000021 /* AudioMixerTests.swift in Sources */,
+				A10000000000000000000022 /* SessionRepositoryTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		I10000000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000023 /* VoicesInViewUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		K10000000000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E10000000000000000000001 /* VoicesInView */;
+			targetProxy = C10000000000000000000001 /* PBXContainerItemProxy */;
+		};
+		K10000000000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E10000000000000000000001 /* VoicesInView */;
+			targetProxy = C10000000000000000000002 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		L10000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		L10000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		L10000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = H5X5QKX93A;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VoicesInView/Resources/Info.plist;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.alwatson.voicesinview;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		L10000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H5X5QKX93A;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VoicesInView/Resources/Info.plist;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.alwatson.voicesinview;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		L10000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = H5X5QKX93A;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.alwatson.voicesinview.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VoicesInView.app/VoicesInView";
+			};
+			name = Debug;
+		};
+		L10000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = H5X5QKX93A;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.alwatson.voicesinview.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VoicesInView.app/VoicesInView";
+			};
+			name = Release;
+		};
+		L10000000000000000000007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = H5X5QKX93A;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.alwatson.voicesinview.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = VoicesInView;
+			};
+			name = Debug;
+		};
+		L10000000000000000000008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = H5X5QKX93A;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.alwatson.voicesinview.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = VoicesInView;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		H10000000000000000000000 /* Build configuration list for PBXProject "VoicesInView" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				L10000000000000000000001 /* Debug */,
+				L10000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		H10000000000000000000001 /* Build configuration list for PBXNativeTarget "VoicesInView" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				L10000000000000000000003 /* Debug */,
+				L10000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		H10000000000000000000002 /* Build configuration list for PBXNativeTarget "VoicesInViewTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				L10000000000000000000005 /* Debug */,
+				L10000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		H10000000000000000000003 /* Build configuration list for PBXNativeTarget "VoicesInViewUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				L10000000000000000000007 /* Debug */,
+				L10000000000000000000008 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D10000000000000000000001 /* Project object */;
+}
