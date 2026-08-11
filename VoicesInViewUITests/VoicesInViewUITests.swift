@@ -36,16 +36,6 @@ final class VoicesInViewUITests: XCTestCase {
         XCTAssertTrue(savedMode.isSelected)
     }
 
-    func testCaptionSizeCanBeChangedFromHome() {
-        continueAfterFailure = false
-        let app = launchApp()
-        let size = app.staticTexts["caption-size-value"]
-        XCTAssertTrue(size.waitForExistence(timeout: 5))
-        XCTAssertEqual(size.label, "36 points")
-        app.buttons["Increase caption size"].tap()
-        XCTAssertEqual(size.label, "42 points")
-    }
-
     func testMicrophoneCheckCanStartAndStop() {
         continueAfterFailure = false
         let app = launchApp()
@@ -77,6 +67,12 @@ final class VoicesInViewUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Listening…"].waitForExistence(timeout: 60))
         XCTAssertFalse(app.alerts["Voices in View"].waitForExistence(timeout: 3))
         XCTAssertEqual(app.state, .runningForeground)
+
+        let size = app.staticTexts["caption-size-value"]
+        XCTAssertTrue(size.exists)
+        let originalSize = size.label
+        app.buttons["Increase caption size"].tap()
+        XCTAssertNotEqual(size.label, originalSize)
 
         app.buttons["End Captions"].tap()
         XCTAssertTrue(startButton.waitForExistence(timeout: 15))

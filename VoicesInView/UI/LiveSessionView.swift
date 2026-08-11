@@ -152,6 +152,8 @@ struct LiveSessionView: View {
                 .font(.callout.monospacedDigit().weight(.bold))
                 .foregroundStyle(AppTheme.secondaryText)
                 .frame(minWidth: 30)
+                .accessibilityLabel("\(Int(model.captionFontSize)) points")
+                .accessibilityIdentifier("caption-size-value")
 
             Button(action: model.increaseFontSize) {
                 Image(systemName: "textformat.size.larger")
