@@ -10,6 +10,10 @@
 
 Voices in View turns in-person conversations into large, real-time captions on an iPhone. It is being built for people who are hard of hearing, bringing an experience similar to FaceTime Live Captions to family gatherings, meetings, and other conversations in the same room.
 
+<p align="center">
+  <img src="docs/assets/voices-in-view-demo.gif" width="320" alt="Voices in View starting a private live-caption session and transcribing speech in real time">
+</p>
+
 ## Why this exists
 
 FaceTime Live Captions changed how my dad, who is hard of hearing, can take part in phone conversations. In person, it is harder: several people may be spread around a room, and an iPhone on the table may not hear everyone clearly.
