@@ -4,6 +4,10 @@
 
 # Voices in View
 
+[![Release](https://img.shields.io/github/v/release/zredlined/voices-in-view-ios?include_prereleases&sort=semver)](https://github.com/zredlined/voices-in-view-ios/releases)
+[![iOS 26+](https://img.shields.io/badge/iOS-26%2B-000000?logo=apple)](https://developer.apple.com/ios/)
+[![License](https://img.shields.io/github/license/zredlined/voices-in-view-ios)](LICENSE)
+
 Voices in View turns in-person conversations into large, real-time captions on an iPhone. It is being built for people who are hard of hearing, bringing an experience similar to FaceTime Live Captions to family gatherings, meetings, and other conversations in the same room.
 
 ## Why this exists
@@ -50,3 +54,7 @@ Voices in View downmixes the receiver's available channels into one Apple `Speec
 - **Ghost:** captions remain in memory for the live session and no transcript files are created.
 
 See [docs/privacy.md](docs/privacy.md) for the user-facing privacy policy draft.
+
+## License
+
+Voices in View is available under the [Apache License 2.0](LICENSE).
