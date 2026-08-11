@@ -24,6 +24,7 @@
 		A1000000000000000000000F /* UI/LiveSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* UI/LiveSessionView.swift */; };
 		A10000000000000000000010 /* UI/HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* UI/HistoryView.swift */; };
 		A10000000000000000000011 /* UI/DiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* UI/DiagnosticsView.swift */; };
+		A10000000000000000000012 /* Resources/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000012 /* Resources/Assets.xcassets */; };
 		A10000000000000000000013 /* Resources/PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000013 /* Resources/PrivacyInfo.xcprivacy */; };
 		A10000000000000000000020 /* CaptionTimelineReducerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* CaptionTimelineReducerTests.swift */; };
 		A10000000000000000000021 /* AudioMixerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000021 /* AudioMixerTests.swift */; };
@@ -272,6 +273,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000000000000000000012 /* Resources/Assets.xcassets in Resources */,
 				A10000000000000000000013 /* Resources/PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -392,6 +394,8 @@
 		L10000000000000000000003 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -412,6 +416,8 @@
 		L10000000000000000000004 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = H5X5QKX93A;
