@@ -57,7 +57,9 @@ Voices in View downmixes the receiver's available channels into one Apple `Speec
 - **Saved:** finalized caption text is stored locally with complete file protection and excluded from backup.
 - **Ghost:** captions remain in memory for the live session and no transcript files are created.
 
-See [docs/privacy.md](docs/privacy.md) for the user-facing privacy policy draft.
+See [docs/privacy.md](docs/privacy.md) for the user-facing privacy policy.
+
+For setup help or troubleshooting, see [docs/support.md](docs/support.md).
 
 ## License
 

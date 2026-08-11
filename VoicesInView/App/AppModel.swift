@@ -25,6 +25,7 @@ final class AppModel: ObservableObject {
     @Published var routeBanner: String?
 
     let audioCapture: AudioCaptureService
+    let screenshotFixture: String?
 
     private enum DefaultsKey {
         static let sessionMode = "sessionMode"
@@ -43,6 +44,7 @@ final class AppModel: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     private var firstSpeechDetectedAt: ContinuousClock.Instant?
     private var previousInputKind: InputKind = .unavailable
+    private var screenshotTranscript: SessionTranscript?
 
     init(
         defaults: UserDefaults = .standard,
@@ -56,6 +58,11 @@ final class AppModel: ObservableObject {
         self.transcriptionEngine = transcriptionEngine ?? AppleSpeechEngine()
         self.savedRepository = savedRepository ?? SavedSessionRepository()
         self.ephemeralRepository = ephemeralRepository
+#if DEBUG
+        self.screenshotFixture = Self.requestedScreenshotFixture()
+#else
+        self.screenshotFixture = nil
+#endif
 
         if ProcessInfo.processInfo.arguments.contains("-ui-testing-reset") {
             defaults.removeObject(forKey: DefaultsKey.sessionMode)
@@ -70,14 +77,17 @@ final class AppModel: ObservableObject {
         captionFontSize = storedSize == 0 ? 36 : min(72, max(24, storedSize))
 
         observeAudioState()
+        configureScreenshotFixtureIfNeeded()
     }
 
     func refreshModelReadiness() async {
+        guard screenshotFixture == nil else { return }
         modelReadiness = .checking
         modelReadiness = await transcriptionEngine.readiness(for: locale)
     }
 
     func refreshHistory() async {
+        guard screenshotFixture == nil else { return }
         do {
             history = try await savedRepository.list()
         } catch {
@@ -235,7 +245,10 @@ final class AppModel: ObservableObject {
     }
 
     func loadTranscript(_ session: CaptionSession) async throws -> SessionTranscript {
-        try await savedRepository.load(sessionID: session.id)
+        if let screenshotTranscript, screenshotTranscript.session.id == session.id {
+            return screenshotTranscript
+        }
+        return try await savedRepository.load(sessionID: session.id)
     }
 
     func delete(_ session: CaptionSession) async {
@@ -328,6 +341,99 @@ final class AppModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
+
+    private func configureScreenshotFixtureIfNeeded() {
+#if DEBUG
+        guard let screenshotFixture else { return }
+
+        modelReadiness = .ready
+        previousInputKind = .usb
+        audioCapture.configureForScreenshot(
+            route: AudioRouteSnapshot(
+                inputName: "DJI Wireless Mic Rx",
+                inputKind: .usb,
+                channelNames: ["Left", "Right"],
+                channelCount: 2,
+                sampleRate: 48_000,
+                inputLatency: 0.02,
+                ioBufferDuration: 0.02,
+                isConnected: true
+            ),
+            meters: AudioMeterSnapshot(
+                rms: [0.42, 0.31],
+                peak: [0.68, 0.54],
+                clippedChannels: [],
+                channelsAreNearlyIdentical: false
+            )
+        )
+
+        let segments = Self.screenshotSegments
+        let session = Self.screenshotSession
+
+        switch screenshotFixture {
+        case "live":
+            currentSession = CaptionSession(
+                id: session.id,
+                startedAt: session.startedAt,
+                localeIdentifier: session.localeIdentifier,
+                mode: .ghost,
+                inputName: session.inputName,
+                channelCount: session.channelCount
+            )
+            visibleSegments = segments
+            isSessionActive = true
+        case "saved":
+            completedSession = session
+            screenshotTranscript = SessionTranscript(session: session, segments: segments)
+        default:
+            sessionMode = .ghost
+        }
+#endif
+    }
+
+#if DEBUG
+    private static func requestedScreenshotFixture() -> String? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let flagIndex = arguments.firstIndex(of: "-screenshot-fixture"),
+              arguments.indices.contains(flagIndex + 1)
+        else { return nil }
+        return arguments[flagIndex + 1]
+    }
+
+    private static let screenshotSession = CaptionSession(
+        id: UUID(uuidString: "71A84213-4FCE-4925-90D6-F705117BCE75")!,
+        startedAt: Date(timeIntervalSinceReferenceDate: 807_303_600),
+        endedAt: Date(timeIntervalSinceReferenceDate: 807_303_672),
+        mode: .saved,
+        inputName: "DJI Wireless Mic Rx",
+        channelCount: 2,
+        openingExcerpt: "Dinner will be ready in about ten minutes."
+    )
+
+    private static let screenshotSegments = [
+        CaptionSegment(
+            channel: .group,
+            startTime: 0,
+            endTime: 3.2,
+            text: "Dinner will be ready in about ten minutes.",
+            isFinal: true
+        ),
+        CaptionSegment(
+            channel: .group,
+            startTime: 3.5,
+            endTime: 7.1,
+            text: "Come into the kitchen whenever you're ready.",
+            isFinal: true
+        ),
+        CaptionSegment(
+            channel: .group,
+            startTime: 7.4,
+            endTime: 11.8,
+            text: "Keep talking — I can follow along right here.",
+            isFinal: false
+        ),
+    ]
+#endif
 
     private func routeDidChange(_ route: AudioRouteSnapshot) async {
         guard isSessionActive else {

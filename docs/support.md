@@ -1,4 +1,6 @@
-# Voices in View Support (Draft)
+# Voices in View Support
+
+For help with Voices in View, [open a support issue](https://github.com/zredlined/voices-in-view-ios/issues/new). Include your iPhone model and iOS version, but do not include private transcript text.
 
 ## DJI Mic Mini setup
 
@@ -16,4 +18,6 @@ The app reports audio level and clipping from the incoming sound. DJI transmitte
 - If captions do not start, check microphone permission in Settings.
 - The US English speech model may need to download before the first session. Once installed, live transcription works offline.
 
-This page needs public support contact information before App Store submission.
+## Privacy
+
+See the [Voices in View Privacy Policy](privacy.md) for details about on-device transcription and saved captions.

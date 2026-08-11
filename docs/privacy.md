@@ -1,4 +1,6 @@
-# Voices in View Privacy Policy (Draft)
+# Voices in View Privacy Policy
+
+Effective August 11, 2026
 
 Voices in View processes microphone audio on your iPhone to display live captions.
 
@@ -11,4 +13,4 @@ Voices in View processes microphone audio on your iPhone to display live caption
 
 You can review and permanently delete saved transcripts from History in the app. Deleting the app also deletes its local transcripts.
 
-This document is a draft for the family pilot and must be given public contact details and an effective date before App Store submission.
+For privacy questions, [open a support issue](https://github.com/zredlined/voices-in-view-ios/issues/new). Do not include private transcript text.

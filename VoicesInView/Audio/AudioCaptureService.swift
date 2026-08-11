@@ -48,6 +48,11 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
     }
 
     func refreshRoute() {
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-screenshot-fixture") {
+            return
+        }
+#endif
         if !isRunning, !hasConfiguredCategory {
             try? audioSession.setCategory(.record, mode: .measurement)
             hasConfiguredCategory = true
@@ -55,6 +60,19 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
         refreshInputInventory()
         routeSnapshot = makeRouteSnapshot()
     }
+
+#if DEBUG
+    func configureForScreenshot(
+        route: AudioRouteSnapshot,
+        meters: AudioMeterSnapshot
+    ) {
+        routeSnapshot = route
+        meterSnapshot = meters
+        availableInputNames = [route.inputName]
+        detectedUSBInputName = route.inputKind == .usb ? route.inputName : nil
+        preferredInputName = route.inputName
+    }
+#endif
 
     func start() async throws -> AsyncStream<TimedAudioFrame> {
         if isRunning {
