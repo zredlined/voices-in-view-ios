@@ -69,54 +69,74 @@ struct LiveSessionView: View {
     }
 
     private var transcript: some View {
-        ScrollViewReader { proxy in
-            ZStack(alignment: .bottomTrailing) {
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 22) {
-                        if model.visibleSegments.isEmpty {
-                            listeningPlaceholder
-                        } else {
-                            ForEach(model.visibleSegments) { segment in
-                                CaptionSegmentView(
-                                    segment: segment,
-                                    fontSize: model.captionFontSize
-                                )
-                                .id(segment.id)
+        GeometryReader { geometry in
+            ScrollViewReader { proxy in
+                ZStack(alignment: .bottomTrailing) {
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 22) {
+                            if model.visibleSegments.isEmpty {
+                                listeningPlaceholder
+                            } else {
+                                ForEach(model.visibleSegments) { segment in
+                                    CaptionSegmentView(
+                                        segment: segment,
+                                        fontSize: model.captionFontSize
+                                    )
+                                    .id(segment.id)
+                                }
                             }
+
+                            Color.clear
+                                .frame(height: geometry.size.height)
+                                .accessibilityHidden(true)
                         }
-
-                        Color.clear
-                            .frame(height: 1)
-                            .id("live-bottom")
+                        .padding(.horizontal, 22)
+                        .padding(.vertical, 28)
                     }
-                    .padding(.horizontal, 22)
-                    .padding(.vertical, 28)
+                    .simultaneousGesture(
+                        DragGesture(minimumDistance: 8).onChanged { _ in autoScroll = false }
+                    )
+
+                    if !autoScroll, !model.visibleSegments.isEmpty {
+                        Button {
+                            autoScroll = true
+                            scrollToLive(using: proxy, animated: true)
+                        } label: {
+                            Label("Jump to Live", systemImage: "arrow.down.circle.fill")
+                                .font(.subheadline.weight(.bold))
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 10)
+                                .background(AppTheme.accent, in: Capsule())
+                                .foregroundStyle(.black)
+                        }
+                        .accessibilityHint("Returns to the current caption")
+                        .padding(16)
+                    }
                 }
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: 8).onChanged { _ in autoScroll = false }
-                )
-
-                if !autoScroll, !model.visibleSegments.isEmpty {
-                    Button {
-                        autoScroll = true
-                        withAnimation { proxy.scrollTo("live-bottom", anchor: .bottom) }
-                    } label: {
-                        Label("Jump to Live", systemImage: "arrow.down.circle.fill")
-                            .font(.subheadline.weight(.bold))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
-                            .background(AppTheme.accent, in: Capsule())
-                            .foregroundStyle(.black)
-                    }
-                    .padding(16)
+                .onChange(of: model.visibleSegments.last?.id) { _, _ in
+                    guard autoScroll else { return }
+                    scrollToLive(using: proxy, animated: true)
+                }
+                .onChange(of: model.captionFontSize) { _, _ in
+                    guard autoScroll else { return }
+                    scrollToLive(using: proxy, animated: false)
+                }
+                .onAppear {
+                    guard autoScroll else { return }
+                    scrollToLive(using: proxy, animated: false)
                 }
             }
-            .onChange(of: model.visibleSegments) { _, _ in
-                guard autoScroll else { return }
-                withAnimation(.easeOut(duration: 0.2)) {
-                    proxy.scrollTo("live-bottom", anchor: .bottom)
-                }
-            }
+        }
+    }
+
+    private func scrollToLive(using proxy: ScrollViewProxy, animated: Bool) {
+        guard let latestSegmentID = model.visibleSegments.last?.id else { return }
+        let scroll = { proxy.scrollTo(latestSegmentID, anchor: .top) }
+
+        if animated {
+            withAnimation(.easeOut(duration: 0.2), scroll)
+        } else {
+            scroll()
         }
     }
 

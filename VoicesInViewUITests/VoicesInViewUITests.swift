@@ -2,13 +2,14 @@ import XCTest
 
 @MainActor
 final class VoicesInViewUITests: XCTestCase {
-    private func launchApp() -> XCUIApplication {
+    private func launchApp(additionalArguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
             "-ui-testing-reset",
             "-AppleLanguages", "(en)",
             "-AppleLocale", "en_US"
         ]
+        app.launchArguments.append(contentsOf: additionalArguments)
         app.launch()
         return app
     }
@@ -51,6 +52,25 @@ final class VoicesInViewUITests: XCTestCase {
         stopButton.tap()
         XCTAssertTrue(startButton.waitForExistence(timeout: 5))
         XCTAssertEqual(app.state, .runningForeground)
+    }
+
+    func testLiveTranscriptCanBrowseHistoryAndJumpBackToCurrentCaption() {
+        continueAfterFailure = false
+        let app = launchApp(additionalArguments: ["-screenshot-fixture", "live"])
+        let currentCaption = app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS %@", "Keep talking")
+        ).firstMatch
+
+        XCTAssertTrue(currentCaption.waitForExistence(timeout: 5))
+        XCTAssertTrue(currentCaption.isHittable)
+
+        app.swipeDown()
+
+        let jumpToLive = app.buttons["Jump to Live"]
+        XCTAssertTrue(jumpToLive.waitForExistence(timeout: 5))
+        jumpToLive.tap()
+        XCTAssertTrue(currentCaption.waitForExistence(timeout: 5))
+        XCTAssertTrue(currentCaption.isHittable)
     }
 
     func testPhysicalDeviceCanBeginAndEndCaptionSession() throws {
