@@ -2,34 +2,42 @@
 
 ## Promotional Text
 
-Private, on-device live captions with large, readable text and your choice of iPhone, USB, or AirPods microphones.
+Private, on-device live captions with large, readable text and flexible iPhone, USB, and supported AirPods microphone options.
+
+## Suggested Subtitle
+
+Private live captions
 
 ## Description
 
 Voices in View helps people who are hard of hearing follow in-person conversations with large, real-time captions on iPhone.
 
-Start a private Ghost Mode session and captions disappear when you stop, or choose Save on this iPhone to keep finalized transcript text locally for later reading, sharing, or deletion.
+Choose the microphone that fits the conversation: the nearby iPhone, a compatible USB microphone, or supported AirPods worn by the person reading captions.
+
+Use Ghost when captions should disappear after the conversation, or choose Save to keep finalized transcript text on this iPhone for later reading, sharing, or deletion.
 
 Features:
 
 • On-device English transcription using Apple’s Speech framework
 • Large, high-contrast captions with live size controls
-• Ghost Mode that does not save transcript text
+• Ghost mode that does not save transcript text
 • Optional local transcript history
 • Share saved transcripts through the iOS share sheet
-• Built-in iPhone microphone support
-• USB audio support, including tested use with DJI Mic Mini
+• A microphone test before starting captions
+• Built-in iPhone microphone support with no extra hardware
+• Compatible USB audio support, including DJI Mic Mini
 • Two-channel USB input mixed into one easy-to-follow conversation feed
-• Optional AirPods Far Field input for hands-free, head-directed listening
+• AirPods Far Field for hands-free, head-directed microphone capture
+• Live scrolling that keeps recent context available
 • No accounts, ads, analytics, cloud transcription, or audio recordings
 
-Choose the iPhone microphone for simple everyday use, a compatible USB microphone for flexible placement, or AirPods Far Field while wearing AirPods. Additional microphone hardware is optional.
+AirPods feature availability depends on the AirPods model and iOS version. Hearing Aid, Transparency, Conversation Boost, and other listening settings remain under the user’s control in iPhone settings; Voices in View does not change them.
 
 Live transcription availability depends on Apple’s on-device speech support for your iPhone. Voices in View currently supports US English and requires iOS 26 or later.
 
 ## Keywords
 
-hearing,captions,transcription,accessibility,speech,conversation,offline,live,meetings,family
+hearing,captions,transcription,accessibility,airpods,microphone,offline,conversation
 
 ## URLs
 
@@ -45,19 +53,12 @@ hearing,captions,transcription,accessibility,speech,conversation,offline,live,me
 
 ## Screenshots
 
-Upload the three PNG files from the appropriate `screenshots/6.5-inch` or `screenshots/6.9-inch` folder in numeric order.
-
-Before submitting 1.1.0, recapture at least:
-
-1. `01-home.png` — show the simplified Input and Caption Mode controls.
-2. `02-live-captions.png` — show current captions anchored at the bottom with recent context above.
-
-The saved-transcript screen did not materially change and can be reused after a visual check.
+The 1.1.0 screenshot sets are ready in `screenshots/6.9-inch` and `screenshots/6.5-inch`. Upload the 6.9-inch PNG files in numeric order; App Store Connect can scale that highest-resolution set for smaller displays. The 6.5-inch set is available if Media Manager requests it.
 
 ## What’s New in 1.1.0
 
-• Choose between iPhone, USB, and AirPods microphone inputs
-• Use AirPods Far Field for hands-free, head-directed capture
-• Test microphone quality before starting captions
+• Choose between iPhone, USB, and supported AirPods microphone inputs
+• Use AirPods Far Field for hands-free, head-directed microphone capture
+• Test microphone levels before starting captions
 • Scroll back through recent captions without losing your place, then jump back to live
-• Simpler Input and Caption Mode controls
+• Enjoy simpler Input and Caption Mode controls
