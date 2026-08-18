@@ -45,7 +45,14 @@ hearing,captions,transcription,accessibility,speech,conversation,offline,live,me
 
 ## Screenshots
 
-Upload the three PNG files in `screenshots/6.5-inch` in numeric order. They are 1284 × 2778 pixels, opaque, and match the dimensions requested by App Store Connect.
+Upload the three PNG files from the appropriate `screenshots/6.5-inch` or `screenshots/6.9-inch` folder in numeric order.
+
+Before submitting 1.1.0, recapture at least:
+
+1. `01-home.png` — show the simplified Input and Caption Mode controls.
+2. `02-live-captions.png` — show current captions anchored at the bottom with recent context above.
+
+The saved-transcript screen did not materially change and can be reused after a visual check.
 
 ## What’s New in 1.1.0
 

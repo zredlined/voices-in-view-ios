@@ -1,6 +1,6 @@
-# AirPods microphone experiment
+# AirPods Far Field engineering notes
 
-This branch tests whether AirPods worn by the person reading captions can outperform an iPhone microphone across the room while preserving that person's normal AirPods hearing assistance.
+These notes document the feasibility research, safety constraints, and quality protocol behind the AirPods Far Field input. The feature uses AirPods worn by the person reading captions and is intended to improve capture of a person across the room while preserving the listener's separately configured AirPods hearing assistance.
 
 ## Feasibility
 
@@ -27,7 +27,7 @@ Apple references:
 - [Use the Hearing Aid feature on AirPods Pro](https://support.apple.com/en-us/120992)
 - [Roadmap issue #1](https://github.com/zredlined/voices-in-view-ios/issues/1)
 
-## What the branch adds
+## Product behavior
 
 The Home screen provides three explicit microphone choices:
 

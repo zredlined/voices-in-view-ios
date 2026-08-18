@@ -8,7 +8,7 @@
 [![iOS 26+](https://img.shields.io/badge/iOS-26%2B-000000?logo=apple)](https://developer.apple.com/ios/)
 [![License](https://img.shields.io/github/license/zredlined/voices-in-view-ios)](LICENSE)
 
-Voices in View turns in-person conversations into large, real-time captions on an iPhone. It is being built for people who are hard of hearing, bringing an experience similar to FaceTime Live Captions to family gatherings, meetings, and other conversations in the same room.
+Voices in View turns in-person conversations into large, real-time captions on an iPhone. It is designed for people who are hard of hearing and brings a FaceTime Live Captions-style experience to family gatherings, meetings, and other conversations in the same room.
 
 <p align="center">
   <img src="docs/assets/voices-in-view-demo.gif" width="320" alt="Voices in View starting a private live-caption session and transcribing speech in real time">
@@ -18,13 +18,13 @@ Voices in View turns in-person conversations into large, real-time captions on a
 
 FaceTime Live Captions changed how my dad, who is hard of hearing, can take part in phone conversations. In person, it is harder: several people may be spread around a room, and an iPhone on the table may not hear everyone clearly.
 
-The main problem is often microphone distance. Speech recognition works better when the microphone is close to the person speaking, before room noise and reverberation get mixed in. A two-transmitter wireless system such as DJI Mic Mini lets two people wear microphones while the receiver sends both channels to the iPhone.
+The main problem is often microphone distance. Speech recognition works better when the microphone is closer to the person speaking, before room noise and reverberation get mixed in. Voices in View can use the iPhone microphone, a compatible USB microphone such as DJI Mic Mini, or supported AirPods worn by the person reading captions.
 
-Voices in View mixes those channels into one conversation feed and transcribes it with Apple's on-device `SpeechTranscriber`:
+Choose the input that fits the conversation, then Voices in View transcribes it with Apple's on-device `SpeechTranscriber`:
 
-`wearable microphones → USB receiver → mixed audio → on-device transcription → live captions`
+`iPhone / USB / AirPods → on-device transcription → live captions`
 
-Keeping one transcript matches how the app is used: the person reading it can usually see who is speaking. It also avoids duplicated captions when both microphones pick up the same voice.
+AirPods Far Field provides a hands-free, head-directed option. A two-transmitter USB system can instead place microphones close to multiple speakers; Voices in View mixes its channels into one easy-to-follow conversation feed.
 
 The transcription runs locally. Raw audio is not recorded or uploaded. Saved sessions store finalized caption text on the device; Ghost Mode does not keep the transcript. Apple describes `SpeechTranscriber` as suitable for live, long-form, and distant speech in its [SpeechAnalyzer overview](https://developer.apple.com/videos/play/wwdc2025/277/).
 
@@ -47,22 +47,21 @@ Alternatively, prefix commands with `DEVELOPER_DIR=/Applications/Xcode.app/Conte
 1. Open `VoicesInView.xcodeproj`.
 2. Choose a personal development team for the VoicesInView target.
 3. Connect an iPhone running iOS 26 and enable Developer Mode.
-4. For DJI Mic Mini, use the phone USB-C adapter, power on the receiver, and double-press the link button until its status LED is cyan (Stereo).
-5. Run the app, open Diagnostics, and confirm that the input is USB and exposes two channels.
+4. Run the app and choose **iPhone**, **USB**, or **AirPods** under Input.
+5. Tap **Test** to check the selected microphone before starting captions.
 
-Voices in View downmixes the receiver's available channels into one Apple `SpeechTranscriber` input. Raw audio is never written to disk.
+For USB and AirPods setup details, see [Support](docs/support.md). Raw audio is never written to disk.
 
 ## Privacy modes
 
-- **Saved:** finalized caption text is stored locally with complete file protection and excluded from backup.
+- **Save:** finalized caption text is stored locally with complete file protection and excluded from backup.
 - **Ghost:** captions remain in memory for the live session and no transcript files are created.
 
 See [docs/privacy.md](docs/privacy.md) for the user-facing privacy policy.
 
 For setup help or troubleshooting, see [docs/support.md](docs/support.md).
 
-For the AirPods far-field capture workflow, safety constraints,
-and comparison protocol, see [docs/airpods-experiment.md](docs/airpods-experiment.md).
+The engineering notes and evaluation protocol for AirPods Far Field remain available in [docs/airpods-experiment.md](docs/airpods-experiment.md).
 
 ## License
 
