@@ -17,6 +17,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var completedSession: CaptionSession?
     @Published private(set) var isSessionActive = false
     @Published private(set) var isTestingMicrophones = false
+    @Published private(set) var isPreparingMicrophoneTest = false
     @Published private(set) var isStarting = false
     @Published private(set) var isStopping = false
     @Published private(set) var firstCaptionLatency: TimeInterval?
@@ -40,7 +41,8 @@ final class AppModel: ObservableObject {
     private let locale = Locale(identifier: "en-US")
     private var timeline = CaptionTimelineReducer()
     private var captionTask: Task<Void, Never>?
-    private var micTestTask: Task<Void, Never>?
+    private var microphoneTestFrames: AsyncStream<TimedAudioFrame>?
+    private var microphoneTestRequestID = UUID()
     private var cancellables: Set<AnyCancellable> = []
     private var firstSpeechDetectedAt: ContinuousClock.Instant?
     private var previousInputKind: InputKind = .unavailable
@@ -97,9 +99,6 @@ final class AppModel: ObservableObject {
 
     func startCaptions() async {
         guard !isSessionActive, !isStarting else { return }
-        if isTestingMicrophones {
-            stopMicrophoneTest()
-        }
         isStarting = true
         completedSession = nil
         errorMessage = nil
@@ -127,7 +126,14 @@ final class AppModel: ObservableObject {
             didBeginSession = true
             activeRepository = repository
 
-            let frames = try await audioCapture.start()
+            let frames: AsyncStream<TimedAudioFrame>
+            if let runningTestFrames = takeMicrophoneTestFrames() {
+                // Keep the already-negotiated AirPods route alive. Tearing the mic check down
+                // here makes iOS switch Bluetooth modes a second time before captions can start.
+                frames = runningTestFrames
+            } else {
+                frames = try await audioCapture.start()
+            }
             let route = audioCapture.routeSnapshot
             session.inputName = route.inputName
             session.channelCount = route.channelCount
@@ -162,7 +168,11 @@ final class AppModel: ObservableObject {
                 }
             }
         } catch {
-            audioCapture.stop()
+            if isTestingMicrophones || isPreparingMicrophoneTest {
+                stopMicrophoneTest()
+            } else {
+                audioCapture.stop()
+            }
             await transcriptionEngine.cancel()
             if didBeginSession {
                 try? await repository.delete(sessionID: session.id)
@@ -179,32 +189,56 @@ final class AppModel: ObservableObject {
     }
 
     func toggleMicrophoneTest() async {
+        guard !isPreparingMicrophoneTest else { return }
         if isTestingMicrophones {
             stopMicrophoneTest()
             return
         }
 
+        let requestID = UUID()
+        microphoneTestRequestID = requestID
+        isPreparingMicrophoneTest = true
         errorMessage = nil
         do {
-            let frames = try await audioCapture.start()
-            isTestingMicrophones = true
-            micTestTask = Task {
-                for await _ in frames {
-                    if Task.isCancelled { return }
-                }
+            let frames = try await audioCapture.startPreview()
+            guard microphoneTestRequestID == requestID else {
+                audioCapture.stop()
+                return
             }
+            microphoneTestFrames = frames
+            isTestingMicrophones = true
         } catch {
             audioCapture.stop()
             isTestingMicrophones = false
             errorMessage = error.localizedDescription
         }
+        if microphoneTestRequestID == requestID {
+            isPreparingMicrophoneTest = false
+        }
+    }
+
+    func selectCaptureProfile(_ profile: AudioCaptureProfile) {
+        if isTestingMicrophones || isPreparingMicrophoneTest {
+            stopMicrophoneTest()
+        }
+        audioCapture.selectCaptureProfile(profile)
     }
 
     func stopMicrophoneTest() {
-        audioCapture.stop()
-        micTestTask?.cancel()
-        micTestTask = nil
+        microphoneTestRequestID = UUID()
+        isPreparingMicrophoneTest = false
         isTestingMicrophones = false
+        microphoneTestFrames = nil
+        audioCapture.stop()
+    }
+
+    private func takeMicrophoneTestFrames() -> AsyncStream<TimedAudioFrame>? {
+        guard isTestingMicrophones, let frames = microphoneTestFrames else { return nil }
+        print("Reusing active microphone test stream for captions")
+        audioCapture.promotePreviewToCaptioning()
+        microphoneTestFrames = nil
+        isTestingMicrophones = false
+        return frames
     }
 
     func stopCaptions() async {
@@ -212,6 +246,9 @@ final class AppModel: ObservableObject {
         isStopping = true
         let session = currentSession
         let endedAt = Date()
+        // Mark the session inactive before deactivating its AirPods route so the resulting
+        // notification isn't mistaken for an unexpected disconnect.
+        isSessionActive = false
         audioCapture.stop()
         await transcriptionEngine.finish()
 
@@ -232,7 +269,6 @@ final class AppModel: ObservableObject {
 
         currentSession = nil
         activeRepository = nil
-        isSessionActive = false
         isStopping = false
         UIApplication.shared.isIdleTimerDisabled = false
         await refreshHistory()
@@ -441,10 +477,26 @@ final class AppModel: ObservableObject {
             return
         }
 
+        if audioCapture.captureProfile.requiresAirPods, route.inputKind != .bluetooth {
+            // Bluetooth routes can briefly report the built-in mic while iOS changes microphone
+            // modes. Only stop a live session if the loss remains stable; mic preview is allowed
+            // to recover on its own and never presents a disconnect alert.
+            try? await Task.sleep(for: .milliseconds(750))
+            guard isSessionActive,
+                  audioCapture.routeSnapshot.inputKind != .bluetooth
+            else { return }
+            await stopCaptions()
+            errorMessage = "AirPods disconnected or stopped being the active microphone, so captions were stopped."
+            previousInputKind = route.inputKind
+            return
+        }
+
         if route.inputKind != previousInputKind {
             switch route.inputKind {
             case .usb:
                 routeBanner = "USB microphone connected"
+            case .bluetooth:
+                routeBanner = "Using \(route.inputName) · \(route.activeBluetoothTuningDescription)"
             case .builtIn:
                 routeBanner = "USB microphone disconnected — using iPhone microphone"
             case .other:

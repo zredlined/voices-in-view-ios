@@ -32,8 +32,18 @@ struct DiagnosticsView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Audio route")
                 .font(.headline)
+            DiagnosticRow(
+                label: "Requested profile",
+                value: model.audioCapture.captureProfile.title
+            )
             DiagnosticRow(label: "Port", value: model.audioCapture.routeSnapshot.inputName)
             DiagnosticRow(label: "Type", value: model.audioCapture.routeSnapshot.inputKind.rawValue)
+            DiagnosticRow(
+                label: "Output",
+                value: model.audioCapture.routeSnapshot.outputNames.isEmpty
+                    ? "Not active"
+                    : model.audioCapture.routeSnapshot.outputNames.joined(separator: ", ")
+            )
             DiagnosticRow(
                 label: "Available inputs",
                 value: model.audioCapture.availableInputNames.isEmpty
@@ -69,6 +79,29 @@ struct DiagnosticsView: View {
             DiagnosticRow(
                 label: "I/O buffer",
                 value: "\(Int(model.audioCapture.routeSnapshot.ioBufferDuration * 1_000)) ms"
+            )
+            DiagnosticRow(
+                label: "Capture format",
+                value: model.audioCapture.captureFormatDescription
+            )
+            DiagnosticRow(
+                label: "Buffers received",
+                value: "\(model.audioCapture.receivedBufferCount)"
+            )
+            DiagnosticRow(
+                label: "Buffers with signal",
+                value: "\(model.audioCapture.nonSilentBufferCount)"
+            )
+            DiagnosticRow(
+                label: "AirPods tuning",
+                value: model.audioCapture.routeSnapshot.activeBluetoothTuningDescription
+            )
+            DiagnosticRow(
+                label: "Far field",
+                value: capabilityDescription(
+                    supported: model.audioCapture.routeSnapshot.bluetoothFarFieldSupported,
+                    enabled: model.audioCapture.routeSnapshot.bluetoothFarFieldEnabled
+                )
             )
             DiagnosticRow(label: "Last event", value: model.audioCapture.lastRouteEvent)
         }
@@ -111,6 +144,11 @@ struct DiagnosticsView: View {
         .font(.subheadline)
         .foregroundStyle(AppTheme.primaryText)
         .appCard()
+    }
+
+    private func capabilityDescription(supported: Bool, enabled: Bool) -> String {
+        if enabled { return "Enabled" }
+        return supported ? "Supported, not enabled" : "Not supported"
     }
 }
 

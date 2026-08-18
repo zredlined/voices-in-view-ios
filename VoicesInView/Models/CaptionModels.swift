@@ -20,8 +20,35 @@ enum SessionMode: String, Codable, CaseIterable, Identifiable, Sendable {
 enum InputKind: String, Codable, Sendable {
     case builtIn
     case usb
+    case bluetooth
     case other
     case unavailable
+}
+
+enum AudioCaptureProfile: String, CaseIterable, Identifiable, Sendable {
+    case standard
+    case usb
+    case airPodsFarField
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .standard: "iPhone"
+        case .usb: "USB"
+        case .airPodsFarField: "AirPods"
+        }
+    }
+
+    var requestedTuningDescription: String {
+        switch self {
+        case .standard: "iPhone microphone"
+        case .usb: "USB microphone"
+        case .airPodsFarField: "Far-field capture"
+        }
+    }
+
+    var requiresAirPods: Bool { self == .airPodsFarField }
 }
 
 struct AudioRouteSnapshot: Equatable, Sendable {
@@ -33,6 +60,9 @@ struct AudioRouteSnapshot: Equatable, Sendable {
     var inputLatency: TimeInterval
     var ioBufferDuration: TimeInterval
     var isConnected: Bool
+    var outputNames: [String] = []
+    var bluetoothFarFieldSupported = false
+    var bluetoothFarFieldEnabled = false
 
     static let unavailable = AudioRouteSnapshot(
         inputName: "No microphone",
@@ -42,7 +72,8 @@ struct AudioRouteSnapshot: Equatable, Sendable {
         sampleRate: 0,
         inputLatency: 0,
         ioBufferDuration: 0,
-        isConnected: false
+        isConnected: false,
+        outputNames: []
     )
 
     var statusDescription: String {
@@ -50,6 +81,12 @@ struct AudioRouteSnapshot: Equatable, Sendable {
         guard channelCount > 0 else { return "Ready · format shown while captioning" }
         let format = sampleRate > 0 ? " · \(Int(sampleRate / 1_000)) kHz" : ""
         return "\(channelCount) \(channelCount == 1 ? "channel" : "channels")\(format)"
+    }
+
+    var activeBluetoothTuningDescription: String {
+        guard inputKind == .bluetooth else { return "Not active" }
+        if bluetoothFarFieldEnabled { return "Far field enabled" }
+        return "Standard Bluetooth"
     }
 }
 
@@ -205,6 +242,7 @@ enum ModelReadiness: Equatable, Sendable {
 enum VoicesInViewError: LocalizedError, Equatable {
     case microphoneDenied
     case microphoneUnavailable
+    case airPodsNotActive
     case speechUnavailable
     case unsupportedLocale
     case modelInstallationFailed(String)
@@ -218,6 +256,8 @@ enum VoicesInViewError: LocalizedError, Equatable {
             "Microphone access is off. Enable it in Settings to start captions."
         case .microphoneUnavailable:
             "No microphone input is available."
+        case .airPodsNotActive:
+            "No AirPods microphone is available. Connect your AirPods, then try again."
         case .speechUnavailable:
             "Apple's on-device speech model isn't available on this iPhone."
         case .unsupportedLocale:

@@ -6,9 +6,10 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                InputStatusCard(
+                MicrophoneSelectionCard(
                     audio: model.audioCapture,
                     isTesting: model.isTestingMicrophones,
+                    isPreparing: model.isPreparingMicrophoneTest,
                     toggleTest: { Task { await model.toggleMicrophoneTest() } }
                 )
 
@@ -27,8 +28,8 @@ struct HomeView: View {
                     }
                 }
                 .buttonStyle(PrimaryActionButtonStyle())
-                .disabled(model.isStarting)
-                .accessibilityHint("Begins listening and shows live on-device captions")
+                .disabled(startIsDisabled)
+                .accessibilityHint(startAccessibilityHint)
 
                 if shouldShowModelStatus {
                     ModelStatusRow(readiness: model.modelReadiness)
@@ -75,5 +76,14 @@ struct HomeView: View {
         case .needsDownload, .ready:
             false
         }
+    }
+
+    private var startIsDisabled: Bool {
+        model.isStarting
+            || model.isPreparingMicrophoneTest
+    }
+
+    private var startAccessibilityHint: String {
+        return "Begins listening and shows live on-device captions"
     }
 }

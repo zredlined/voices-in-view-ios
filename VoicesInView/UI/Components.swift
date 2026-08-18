@@ -4,9 +4,14 @@ struct SessionModePicker: View {
     @Binding var selection: SessionMode
 
     var body: some View {
-        HStack(spacing: 8) {
-            modeButton(.ghost)
-            modeButton(.saved)
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Caption mode", systemImage: "captions.bubble.fill")
+                .font(.headline)
+
+            HStack(spacing: 8) {
+                modeButton(.ghost)
+                modeButton(.saved)
+            }
         }
         .appCard()
         .accessibilityElement(children: .contain)
@@ -23,16 +28,11 @@ struct SessionModePicker: View {
                 } else {
                     Image(systemName: "square.and.arrow.down")
                 }
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(mode == .ghost ? "Ghost Mode" : "Save")
-                        .font(.subheadline.weight(.semibold))
-                    Text(mode == .ghost ? "Not saved" : "On this iPhone")
-                        .font(.caption2)
-                        .opacity(0.78)
-                }
+                Text(mode == .ghost ? "Ghost" : "Save")
+                    .font(.subheadline.weight(.semibold))
             }
             .foregroundStyle(selection == mode ? Color.black : AppTheme.primaryText)
-            .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 48, alignment: .center)
             .padding(.horizontal, 12)
             .background(
                 selection == mode ? AppTheme.accent : Color.white.opacity(0.06),
@@ -48,12 +48,13 @@ struct SessionModePicker: View {
 struct InputStatusCard: View {
     @ObservedObject var audio: AudioCaptureService
     var isTesting = false
+    var isPreparing = false
     var toggleTest: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .center) {
-                Image(systemName: displayInputKind == .usb ? "cable.connector" : "mic.fill")
+                Image(systemName: displayInputIcon)
                     .font(.title2)
                     .foregroundStyle(inputColor)
                     .frame(width: 32)
@@ -70,17 +71,23 @@ struct InputStatusCard: View {
 
                 if let toggleTest {
                     Button(action: toggleTest) {
-                        Text(isTesting ? "Stop" : "Test")
-                            .font(.subheadline.weight(.semibold))
-                            .frame(minWidth: 48, minHeight: 44)
+                        HStack(spacing: 7) {
+                            if isPreparing {
+                                ProgressView()
+                            }
+                            Text(testButtonTitle)
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .frame(minWidth: isPreparing ? 108 : 48, minHeight: 44)
                     }
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
                     .tint(isTesting ? AppTheme.warning : AppTheme.accent)
-                    .accessibilityLabel(isTesting ? "Stop Mic Check" : "Check Mic Levels")
+                    .disabled(isPreparing)
+                    .accessibilityLabel(testAccessibilityLabel)
                     .accessibilityHint("Tests microphone levels without creating captions")
                 } else {
-                    Text(displayInputKind == .usb ? "USB" : "iPhone")
+                    Text(inputBadge)
                         .font(.caption.weight(.bold))
                         .padding(.horizontal, 9)
                         .padding(.vertical, 5)
@@ -89,8 +96,15 @@ struct InputStatusCard: View {
                 }
             }
 
-            if isTesting || !audio.meterSnapshot.rms.isEmpty {
+            if isPreparing || isTesting || !audio.meterSnapshot.rms.isEmpty {
                 ChannelMeters(snapshot: audio.meterSnapshot)
+            }
+
+            if isPreparing || isTesting {
+                Label(captureActivityText, systemImage: captureActivityIcon)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(captureActivityColor)
+                    .accessibilityIdentifier("capture-buffer-status")
             }
 
             if audio.meterSnapshot.channelsAreNearlyIdentical {
@@ -107,24 +121,218 @@ struct InputStatusCard: View {
     private var inputColor: Color {
         switch displayInputKind {
         case .usb: AppTheme.success
-        case .builtIn, .other: AppTheme.accent
+        case .builtIn, .bluetooth, .other: AppTheme.accent
         case .unavailable: AppTheme.danger
         }
     }
 
+    private var inputBadge: String {
+        switch displayInputKind {
+        case .usb: "USB"
+        case .bluetooth: "AirPods"
+        case .builtIn: "iPhone"
+        case .other: "Other"
+        case .unavailable: "None"
+        }
+    }
+
     private var displayInputKind: InputKind {
-        audio.detectedUSBInputName == nil ? audio.routeSnapshot.inputKind : .usb
+        if audio.captureProfile.requiresAirPods {
+            return audio.selectedInputKind ?? .bluetooth
+        }
+        return audio.detectedUSBInputName == nil ? audio.routeSnapshot.inputKind : .usb
     }
 
     private var displayInputName: String {
-        audio.detectedUSBInputName ?? audio.routeSnapshot.inputName
+        if audio.captureProfile.requiresAirPods {
+            return audio.selectedInputName ?? "AirPods (automatic)"
+        }
+        return audio.detectedUSBInputName ?? audio.routeSnapshot.inputName
     }
 
     private var displayStatus: String {
+        if audio.captureProfile.requiresAirPods,
+           audio.routeSnapshot.inputKind != .bluetooth
+        {
+            return displayInputKind == .bluetooth ? "Ready" : "Unavailable"
+        }
         if audio.detectedUSBInputName != nil, audio.routeSnapshot.inputKind != .usb {
             return "USB available · tap Test to connect"
         }
         return audio.routeSnapshot.statusDescription
+    }
+
+    private var displayInputIcon: String {
+        switch displayInputKind {
+        case .bluetooth: "airpodspro"
+        case .usb: "cable.connector"
+        case .builtIn, .other: "mic.fill"
+        case .unavailable: "mic.slash"
+        }
+    }
+
+    private var captureActivityText: String {
+        if isPreparing {
+            return "Connecting to the selected microphone…"
+        }
+        if audio.receivedBufferCount == 0 {
+            return "Waiting for microphone buffers…"
+        }
+        if audio.nonSilentBufferCount == 0 {
+            return "Receiving buffers, but they are silent"
+        }
+        return "Receiving live microphone audio"
+    }
+
+    private var captureActivityIcon: String {
+        if isPreparing { return "arrow.trianglehead.2.clockwise.rotate.90.circle" }
+        return audio.nonSilentBufferCount > 0 ? "waveform.circle.fill" : "exclamationmark.circle"
+    }
+
+    private var captureActivityColor: Color {
+        if isPreparing { return AppTheme.accent }
+        return audio.nonSilentBufferCount > 0 ? AppTheme.success : AppTheme.warning
+    }
+
+    private var testButtonTitle: String {
+        if isPreparing { return "Connecting" }
+        return isTesting ? "Stop" : "Test"
+    }
+
+    private var testAccessibilityLabel: String {
+        if isPreparing { return "Connecting Microphone" }
+        return isTesting ? "Stop Mic Check" : "Check Mic Levels"
+    }
+}
+
+struct MicrophoneSelectionCard: View {
+    @EnvironmentObject private var model: AppModel
+    @ObservedObject var audio: AudioCaptureService
+    var isTesting = false
+    var isPreparing = false
+    var toggleTest: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Label("Input", systemImage: "mic.fill")
+                    .font(.headline)
+
+                Spacer()
+
+                Button(action: toggleTest) {
+                    HStack(spacing: 7) {
+                        if isPreparing {
+                            ProgressView()
+                        }
+                        Text(testButtonTitle)
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .frame(minWidth: isPreparing ? 108 : 48, minHeight: 40)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                .tint(isTesting ? AppTheme.warning : AppTheme.accent)
+                .disabled(isPreparing)
+                .accessibilityLabel(testAccessibilityLabel)
+            }
+
+            HStack(spacing: 8) {
+                sourceButton(.standard, icon: "iphone")
+                sourceButton(.usb, icon: "cable.connector")
+                airPodsButton
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("capture-profile-picker")
+
+            if isPreparing || isTesting {
+                ChannelMeters(snapshot: audio.meterSnapshot)
+            }
+        }
+        .appCard()
+        .accessibilityElement(children: .contain)
+    }
+
+    private var controlsAreDisabled: Bool {
+        model.isTestingMicrophones || model.isPreparingMicrophoneTest || model.isStarting
+    }
+
+    @ViewBuilder
+    private var airPodsButton: some View {
+        if audio.bluetoothInputChoices.count > 1 {
+            Menu {
+                ForEach(audio.bluetoothInputChoices) { choice in
+                    Button {
+                        model.selectCaptureProfile(.airPodsFarField)
+                        audio.selectBluetoothInput(id: choice.id)
+                    } label: {
+                        if choice.name == audio.selectedInputName {
+                            Label(choice.name, systemImage: "checkmark")
+                        } else {
+                            Text(choice.name)
+                        }
+                    }
+                }
+            } label: {
+                sourceLabel(.airPodsFarField, icon: "airpodspro", showsMenu: true)
+            }
+            .buttonStyle(.plain)
+            .disabled(controlsAreDisabled)
+            .accessibilityLabel("AirPods")
+            .accessibilityHint("Shows connected AirPods")
+        } else {
+            sourceButton(.airPodsFarField, icon: "airpodspro")
+        }
+    }
+
+    private func sourceButton(_ profile: AudioCaptureProfile, icon: String) -> some View {
+        Button {
+            model.selectCaptureProfile(profile)
+        } label: {
+            sourceLabel(profile, icon: icon)
+        }
+        .buttonStyle(.plain)
+        .disabled(controlsAreDisabled || (profile == .usb && audio.detectedUSBInputName == nil))
+        .opacity(profile == .usb && audio.detectedUSBInputName == nil ? 0.4 : 1)
+        .accessibilityLabel(profile.title)
+        .accessibilityAddTraits(audio.captureProfile == profile ? .isSelected : [])
+    }
+
+    private func sourceLabel(
+        _ profile: AudioCaptureProfile,
+        icon: String,
+        showsMenu: Bool = false
+    ) -> some View {
+        VStack(spacing: 5) {
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.title3)
+                if showsMenu {
+                    Image(systemName: "chevron.down")
+                        .font(.caption2.weight(.bold))
+                }
+            }
+            Text(profile.title)
+                .font(.caption.weight(.semibold))
+                .lineLimit(1)
+        }
+        .foregroundStyle(audio.captureProfile == profile ? Color.black : AppTheme.primaryText)
+        .frame(maxWidth: .infinity, minHeight: 56)
+        .background(
+            audio.captureProfile == profile ? AppTheme.accent : Color.white.opacity(0.06),
+            in: RoundedRectangle(cornerRadius: 14)
+        )
+        .contentShape(Rectangle())
+    }
+
+    private var testButtonTitle: String {
+        if isPreparing { return "Connecting" }
+        return isTesting ? "Stop" : "Test"
+    }
+
+    private var testAccessibilityLabel: String {
+        if isPreparing { return "Connecting Microphone" }
+        return isTesting ? "Stop Mic Check" : "Check Mic Levels"
     }
 }
 

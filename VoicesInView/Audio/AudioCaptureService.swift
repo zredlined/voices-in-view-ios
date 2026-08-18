@@ -2,6 +2,11 @@
 import CoreMedia
 import Foundation
 
+struct BluetoothInputChoice: Identifiable, Equatable, Sendable {
+    let id: String
+    let name: String
+}
+
 @MainActor
 final class AudioCaptureService: ObservableObject, AudioCapturing {
     @Published private(set) var routeSnapshot: AudioRouteSnapshot = .unavailable
@@ -11,6 +16,13 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
     @Published private(set) var availableInputNames: [String] = []
     @Published private(set) var detectedUSBInputName: String?
     @Published private(set) var preferredInputName: String?
+    @Published private(set) var selectedInputName: String?
+    @Published private(set) var selectedInputKind: InputKind?
+    @Published private(set) var bluetoothInputChoices: [BluetoothInputChoice] = []
+    @Published private(set) var captureProfile: AudioCaptureProfile = .standard
+    @Published private(set) var receivedBufferCount = 0
+    @Published private(set) var nonSilentBufferCount = 0
+    @Published private(set) var captureFormatDescription = "Not active"
 
     private let audioSession = AVAudioSession.sharedInstance()
     private var audioEngine = AVAudioEngine()
@@ -24,6 +36,15 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
     private var duplicateChannelEvidence = 0
     private var negotiatedChannelCount = 0
     private var negotiatedSampleRate: Double = 0
+    private var didLogFirstBuffer = false
+    private var didLogFirstSignal = false
+    private var activeRouteFingerprint: String?
+    private var totalReceivedBufferCount = 0
+    private var totalNonSilentBufferCount = 0
+    private var lastMeterPublicationTime: TimeInterval = 0
+    private var lastDiagnosticPublicationTime: TimeInterval = 0
+    private var isPreviewCapture = false
+    private var manuallySelectedBluetoothInputUID: String?
 
     init() {
         installNotifications()
@@ -58,7 +79,56 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
             hasConfiguredCategory = true
         }
         refreshInputInventory()
+        if !isRunning {
+            try? selectInputForCurrentProfile()
+        }
         routeSnapshot = makeRouteSnapshot()
+    }
+
+    func selectCaptureProfile(_ profile: AudioCaptureProfile) {
+        guard !isRunning else { return }
+        captureProfile = profile
+        if profile == .airPodsFarField, selectedInputKind != .bluetooth {
+            selectedInputName = nil
+            selectedInputKind = nil
+        }
+
+        do {
+            try configureAudioCategory()
+            refreshInputInventory()
+            try selectInputForCurrentProfile()
+            lastRouteEvent = "Requested \(profile.requestedTuningDescription)"
+        } catch {
+            lastRouteEvent = "Audio setup failed: \(error.localizedDescription)"
+        }
+        refreshInputInventory()
+        routeSnapshot = makeRouteSnapshot()
+    }
+
+    func selectBluetoothInput(id: String) {
+        guard !isRunning,
+              captureProfile == .airPodsFarField,
+              let choice = bluetoothInputChoices.first(where: { $0.id == id })
+        else { return }
+
+        manuallySelectedBluetoothInputUID = choice.id
+        selectedInputName = choice.name
+        selectedInputKind = .bluetooth
+
+        guard let input = audioSession.availableInputs?.first(where: {
+            $0.uid == id && $0.portType == .bluetoothHFP
+        }) else {
+            lastRouteEvent = "Will use \(choice.name) when listening"
+            return
+        }
+
+        do {
+            try applySelectedInput(input)
+            lastRouteEvent = "Selected \(input.portName)"
+            routeSnapshot = makeRouteSnapshot()
+        } catch {
+            lastRouteEvent = "Couldn't select \(input.portName): \(error.localizedDescription)"
+        }
     }
 
 #if DEBUG
@@ -75,6 +145,19 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
 #endif
 
     func start() async throws -> AsyncStream<TimedAudioFrame> {
+        try await startCapture(isPreview: false)
+    }
+
+    func startPreview() async throws -> AsyncStream<TimedAudioFrame> {
+        try await startCapture(isPreview: true)
+    }
+
+    func promotePreviewToCaptioning() {
+        isPreviewCapture = false
+        droppedFrameCount = 0
+    }
+
+    private func startCapture(isPreview: Bool) async throws -> AsyncStream<TimedAudioFrame> {
         if isRunning {
             stop()
         }
@@ -88,14 +171,25 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
             bufferingPolicy: .bufferingNewest(16)
         )
         frameContinuation = streamPair.continuation
+        isPreviewCapture = isPreview
         droppedFrameCount = 0
         duplicateChannelEvidence = 0
+        receivedBufferCount = 0
+        nonSilentBufferCount = 0
+        totalReceivedBufferCount = 0
+        totalNonSilentBufferCount = 0
+        lastMeterPublicationTime = 0
+        lastDiagnosticPublicationTime = 0
+        captureFormatDescription = "Preparing"
+        didLogFirstBuffer = false
+        didLogFirstSignal = false
         clock.reset()
 
         do {
             try await configureSession()
             try installTapAndStart(using: streamPair.continuation)
             isRunning = true
+            activeRouteFingerprint = makeRouteFingerprint()
             routeSnapshot = makeRouteSnapshot()
             return streamPair.stream
         } catch {
@@ -108,6 +202,8 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
 
     func stop() {
         isRunning = false
+        isPreviewCapture = false
+        activeRouteFingerprint = nil
         negotiatedChannelCount = 0
         negotiatedSampleRate = 0
         removeInputTapIfInstalled()
@@ -115,13 +211,15 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
         frameContinuation?.finish()
         frameContinuation = nil
         meterSnapshot = .silent
+        captureFormatDescription = "Not active"
         try? audioSession.setActive(false, options: .notifyOthersOnDeactivation)
         refreshRoute()
     }
 
     private func configureSession() async throws {
-        try audioSession.setCategory(.record, mode: .measurement)
-        hasConfiguredCategory = true
+        try configureAudioCategory()
+        refreshInputInventory()
+        try selectInputForCurrentProfile()
         try? audioSession.setPreferredSampleRate(48_000)
         try? audioSession.setPreferredIOBufferDuration(0.02)
         try audioSession.setActive(true)
@@ -129,9 +227,24 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
         // Input ports are only authoritative after the category, mode, and active state are set.
         // Give Core Audio a scheduling turn to publish a newly attached USB interface.
         await Task.yield()
-        refreshInputInventory()
+        refreshInputInventory(preserveBluetoothChoices: false)
+        try selectInputForCurrentProfile(clearUnavailableAirPods: true)
 
-        if let usbInput = audioSession.availableInputs?.first(where: { $0.portType == .usbAudio }) {
+        if captureProfile.requiresAirPods {
+            // Bluetooth routing can settle after activation. Give the automatically selected
+            // AirPods a bounded window to become the active HFP microphone.
+            for _ in 0 ..< 10 where !currentRouteUsesSelectedBluetoothMicrophone {
+                try await Task.sleep(for: .milliseconds(50))
+            }
+            guard currentRouteUsesSelectedBluetoothMicrophone else {
+                throw VoicesInViewError.airPodsNotActive
+            }
+        } else if captureProfile == .usb {
+            guard let usbInput = audioSession.availableInputs?.first(where: {
+                $0.portType == .usbAudio
+            }) else {
+                throw VoicesInViewError.microphoneUnavailable
+            }
             try audioSession.setPreferredInput(usbInput)
 
             // A preferred input is a routing request, not proof that the route changed. Wait a
@@ -150,6 +263,25 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
         refreshInputInventory()
     }
 
+    private func configureAudioCategory() throws {
+        switch captureProfile {
+        case .standard, .usb:
+            try audioSession.setCategory(.record, mode: .measurement)
+        case .airPodsFarField:
+            guard #available(iOS 26.2, *) else {
+                throw VoicesInViewError.audioConfigurationFailed(
+                    "Far-field capture requires iOS 26.2 or later."
+                )
+            }
+            try audioSession.setCategory(
+                .playAndRecord,
+                mode: .default,
+                options: [.allowBluetoothHFP, .farFieldInput, .mixWithOthers]
+            )
+        }
+        hasConfiguredCategory = true
+    }
+
     private func installTapAndStart(
         using continuation: AsyncStream<TimedAudioFrame>.Continuation
     ) throws {
@@ -162,6 +294,13 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
         }
         negotiatedChannelCount = Int(inputFormat.channelCount)
         negotiatedSampleRate = inputFormat.sampleRate
+        captureFormatDescription = Self.describe(inputFormat)
+        print(
+            "Audio capture starting | profile=\(captureProfile.rawValue) "
+                + "input=\(audioSession.currentRoute.inputs.map(\.portName)) "
+                + "output=\(audioSession.currentRoute.outputs.map(\.portName)) "
+                + "format=\(captureFormatDescription)"
+        )
 
         let frameClock = clock
         let tapBlock = Self.makeTapBlock(
@@ -172,7 +311,7 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
                 self?.updateMeterSnapshot(meters)
             },
             recordDroppedFrame: { [weak self] in
-                self?.droppedFrameCount += 1
+                self?.recordDroppedFrameIfNeeded()
             }
         )
         inputNode.installTap(
@@ -233,6 +372,37 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
     }
 
     private func updateMeterSnapshot(_ snapshot: AudioMeterSnapshot) {
+        totalReceivedBufferCount += 1
+        let isFirstBuffer = !didLogFirstBuffer
+        if isFirstBuffer {
+            didLogFirstBuffer = true
+            print("Audio capture received its first buffer")
+        }
+
+        let containsSignal = snapshot.strongestLevel > 0.01
+        let isFirstSignal = containsSignal && !didLogFirstSignal
+        if containsSignal {
+            totalNonSilentBufferCount += 1
+            if isFirstSignal {
+                didLogFirstSignal = true
+                print("Audio capture received its first non-silent buffer")
+            }
+        }
+
+        // The audio tap normally fires around 50 times per second. Publishing three separate
+        // observable properties for every buffer causes the whole home screen to be invalidated
+        // more than 100 times per second, which is especially noticeable while Bluetooth routes.
+        let now = ProcessInfo.processInfo.systemUptime
+        guard isFirstBuffer || isFirstSignal || now - lastMeterPublicationTime >= 1.0 / 15.0 else {
+            return
+        }
+        lastMeterPublicationTime = now
+        if isFirstBuffer || isFirstSignal || now - lastDiagnosticPublicationTime >= 0.5 {
+            lastDiagnosticPublicationTime = now
+            receivedBufferCount = totalReceivedBufferCount
+            nonSilentBufferCount = totalNonSilentBufferCount
+        }
+
         if snapshot.channelsAreNearlyIdentical {
             duplicateChannelEvidence = min(12, duplicateChannelEvidence + 1)
         } else {
@@ -244,6 +414,16 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
         meterSnapshot = displayed
     }
 
+    private func recordDroppedFrameIfNeeded() {
+        guard !isPreviewCapture else { return }
+        droppedFrameCount += 1
+    }
+
+    nonisolated private static func describe(_ format: AVAudioFormat) -> String {
+        let layout = format.isInterleaved ? "interleaved" : "non-interleaved"
+        return "\(Int(format.sampleRate)) Hz · \(format.channelCount) ch · \(format.commonFormat) · \(layout)"
+    }
+
     private func makeRouteSnapshot() -> AudioRouteSnapshot {
         let currentInputs = audioSession.currentRoute.inputs
         let availableInputs = audioSession.availableInputs ?? []
@@ -252,15 +432,9 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
 
         guard let input else { return .unavailable }
 
-        let kind: InputKind
-        switch input.portType {
-        case .usbAudio:
-            kind = .usb
-        case .builtInMic:
-            kind = .builtIn
-        default:
-            kind = .other
-        }
+        let kind = Self.inputKind(for: input.portType)
+
+        let bluetooth = input.bluetoothMicrophoneExtension
 
         let channels = input.channels ?? []
         let names: [String] = channels.map { channel -> String in
@@ -282,7 +456,10 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
             sampleRate: sampleRate,
             inputLatency: audioSession.inputLatency,
             ioBufferDuration: audioSession.ioBufferDuration,
-            isConnected: true
+            isConnected: true,
+            outputNames: audioSession.currentRoute.outputs.map(\.portName),
+            bluetoothFarFieldSupported: bluetooth?.farFieldCapture.isSupported ?? false,
+            bluetoothFarFieldEnabled: bluetooth?.farFieldCapture.isEnabled ?? false
         )
     }
 
@@ -348,6 +525,12 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
         routeSnapshot = makeRouteSnapshot()
 
         guard isRunning, !isReconfiguring, let continuation = frameContinuation else { return }
+
+        // Activating and starting an AVAudioEngine can itself emit category/route-configuration
+        // notifications. Rebuilding the engine for those no-op notifications creates a restart
+        // loop on Bluetooth HFP routes before useful microphone buffers can arrive.
+        let routeFingerprint = makeRouteFingerprint()
+        guard routeFingerprint != activeRouteFingerprint else { return }
         isReconfiguring = true
 
         removeInputTapIfInstalled()
@@ -356,11 +539,23 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
         do {
             try await configureSession()
             try installTapAndStart(using: continuation)
+            activeRouteFingerprint = makeRouteFingerprint()
             routeSnapshot = makeRouteSnapshot()
         } catch {
             lastRouteEvent = "Route recovery failed: \(error.localizedDescription)"
         }
         isReconfiguring = false
+    }
+
+    private func makeRouteFingerprint() -> String {
+        let inputs = audioSession.currentRoute.inputs.map {
+            "\($0.uid)|\($0.portType.rawValue)|\($0.portName)"
+        }
+        let outputs = audioSession.currentRoute.outputs.map {
+            "\($0.uid)|\($0.portType.rawValue)|\($0.portName)"
+        }
+        return (inputs + outputs).joined(separator: ";")
+            + "|\(audioSession.sampleRate)|\(audioSession.inputNumberOfChannels)"
     }
 
     private func handleInterruption(_ type: AVAudioSession.InterruptionType?) {
@@ -381,14 +576,101 @@ final class AudioCaptureService: ObservableObject, AudioCapturing {
         audioSession.currentRoute.inputs.contains { $0.portType == .usbAudio }
     }
 
-    private func refreshInputInventory() {
+    private var currentRouteUsesSelectedBluetoothMicrophone: Bool {
+        audioSession.currentRoute.inputs.contains { input in
+            guard input.portType == .bluetoothHFP else { return false }
+            return selectedInputName == nil || input.portName == selectedInputName
+        }
+    }
+
+    private func refreshInputInventory(preserveBluetoothChoices: Bool = true) {
         let inputs = audioSession.availableInputs ?? []
         availableInputNames = inputs.map { input in
-            let kind = input.portType == .usbAudio ? "USB" : input.portType.rawValue
+            let kind: String
+            switch input.portType {
+            case .usbAudio: kind = "USB"
+            case .bluetoothHFP: kind = "Bluetooth microphone"
+            default: kind = input.portType.rawValue
+            }
             return "\(input.portName) (\(kind))"
         }
+        let discoveredBluetoothInputs = inputs
+            .filter { $0.portType == .bluetoothHFP }
+            .map { BluetoothInputChoice(id: $0.uid, name: $0.portName) }
+        if !discoveredBluetoothInputs.isEmpty || !preserveBluetoothChoices {
+            bluetoothInputChoices = discoveredBluetoothInputs
+        }
         detectedUSBInputName = inputs.first(where: { $0.portType == .usbAudio })?.portName
+        let preferredInput = audioSession.preferredInput
+        preferredInputName = preferredInput?.portName
+
+        if selectedInputName == nil,
+           let initialInput = preferredInput ?? audioSession.currentRoute.inputs.first
+        {
+            selectedInputName = initialInput.portName
+            selectedInputKind = Self.inputKind(for: initialInput.portType)
+        }
+    }
+
+    private func selectInputForCurrentProfile(clearUnavailableAirPods: Bool = false) throws {
+        let inputs = audioSession.availableInputs ?? []
+        let selectedInput: AVAudioSessionPortDescription?
+
+        switch captureProfile {
+        case .standard:
+            selectedInput = inputs.first(where: { $0.portType == .builtInMic })
+                ?? audioSession.currentRoute.inputs.first
+        case .usb:
+            selectedInput = inputs.first(where: { $0.portType == .usbAudio })
+        case .airPodsFarField:
+            let manualBluetooth = manuallySelectedBluetoothInputUID.flatMap { uid in
+                inputs.first(where: { $0.uid == uid && $0.portType == .bluetoothHFP })
+            }
+            if clearUnavailableAirPods,
+               manuallySelectedBluetoothInputUID != nil,
+               manualBluetooth == nil
+            {
+                manuallySelectedBluetoothInputUID = nil
+            }
+
+            let outputNames = Set(audioSession.currentRoute.outputs.map(\.portName))
+            let activeOutputBluetooth = inputs.first(where: {
+                $0.portType == .bluetoothHFP && outputNames.contains($0.portName)
+            })
+            let preferredBluetooth = audioSession.preferredInput.flatMap { preferred in
+                inputs.first(where: { $0.uid == preferred.uid && $0.portType == .bluetoothHFP })
+            }
+            selectedInput = manualBluetooth
+                ?? activeOutputBluetooth
+                ?? preferredBluetooth
+                ?? inputs.first(where: { $0.portType == .bluetoothHFP })
+        }
+
+        guard let selectedInput else {
+            if captureProfile.requiresAirPods, clearUnavailableAirPods {
+                selectedInputName = nil
+                selectedInputKind = nil
+            }
+            return
+        }
+
+        try applySelectedInput(selectedInput)
+    }
+
+    private func applySelectedInput(_ selectedInput: AVAudioSessionPortDescription) throws {
+        try audioSession.setPreferredInput(selectedInput)
+        selectedInputName = selectedInput.portName
+        selectedInputKind = Self.inputKind(for: selectedInput.portType)
         preferredInputName = audioSession.preferredInput?.portName
+    }
+
+    nonisolated private static func inputKind(for portType: AVAudioSession.Port) -> InputKind {
+        switch portType {
+        case .usbAudio: .usb
+        case .builtInMic: .builtIn
+        case .bluetoothHFP: .bluetooth
+        default: .other
+        }
     }
 
     nonisolated private static func describe(

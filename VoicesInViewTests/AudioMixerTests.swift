@@ -33,6 +33,30 @@ final class AudioMixerTests: XCTestCase {
         XCTAssertEqual(snapshot.statusDescription, "1 channel · 48 kHz")
     }
 
+    func testBluetoothSnapshotReportsTheModeThatActuallyBecameEnabled() {
+        var snapshot = AudioRouteSnapshot(
+            inputName: "AirPods Pro",
+            inputKind: .bluetooth,
+            channelNames: ["Microphone"],
+            channelCount: 1,
+            sampleRate: 48_000,
+            inputLatency: 0.08,
+            ioBufferDuration: 0.02,
+            isConnected: true
+        )
+
+        XCTAssertEqual(snapshot.activeBluetoothTuningDescription, "Standard Bluetooth")
+
+        snapshot.bluetoothFarFieldEnabled = true
+        XCTAssertEqual(snapshot.activeBluetoothTuningDescription, "Far field enabled")
+    }
+
+    func testOnlyAirPodsProfilesRequireTheListeningSafetyCheck() {
+        XCTAssertFalse(AudioCaptureProfile.standard.requiresAirPods)
+        XCTAssertFalse(AudioCaptureProfile.usb.requiresAirPods)
+        XCTAssertTrue(AudioCaptureProfile.airPodsFarField.requiresAirPods)
+    }
+
     @MainActor
     func testStoppingAudioCaptureIsSafeBeforeStarting() {
         let capture = AudioCaptureService()

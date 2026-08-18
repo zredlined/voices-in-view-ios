@@ -4,6 +4,7 @@ struct LiveSessionView: View {
     @EnvironmentObject private var model: AppModel
     @ScaledMetric(relativeTo: .title) private var dynamicTypeScale: CGFloat = 1
     @State private var autoScroll = true
+    private let liveAnchorID = "live-transcript-bottom"
 
     var body: some View {
         VStack(spacing: 0) {
@@ -52,7 +53,7 @@ struct LiveSessionView: View {
 
                 Spacer()
 
-                Text(model.audioCapture.routeSnapshot.inputKind == .usb ? "USB" : "iPhone Mic")
+                Text(liveInputLabel)
                     .font(.caption.weight(.bold))
                     .foregroundStyle(
                         model.audioCapture.routeSnapshot.inputKind == .usb
@@ -68,70 +69,89 @@ struct LiveSessionView: View {
         .overlay(alignment: .bottom) { Divider().overlay(AppTheme.cardBorder) }
     }
 
+    private var liveInputLabel: String {
+        switch model.audioCapture.routeSnapshot.inputKind {
+        case .usb: "USB"
+        case .bluetooth:
+            model.audioCapture.routeSnapshot.bluetoothFarFieldEnabled
+                ? "AIRPODS · FAR FIELD"
+                : "AIRPODS"
+        case .builtIn: "IPHONE MIC"
+        case .other: "EXTERNAL MIC"
+        case .unavailable: "NO MIC"
+        }
+    }
+
     private var transcript: some View {
-        GeometryReader { geometry in
-            ScrollViewReader { proxy in
-                ZStack(alignment: .bottomTrailing) {
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 22) {
-                            if model.visibleSegments.isEmpty {
-                                listeningPlaceholder
-                            } else {
-                                ForEach(model.visibleSegments) { segment in
-                                    CaptionSegmentView(
-                                        segment: segment,
-                                        fontSize: model.captionFontSize
-                                    )
-                                    .id(segment.id)
-                                }
+        ScrollViewReader { proxy in
+            ZStack(alignment: .bottomTrailing) {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 22) {
+                        if model.visibleSegments.isEmpty {
+                            listeningPlaceholder
+                        } else {
+                            ForEach(model.visibleSegments) { segment in
+                                CaptionSegmentView(
+                                    segment: segment,
+                                    fontSize: model.captionFontSize
+                                )
+                                .id(segment.id)
                             }
-
-                            Color.clear
-                                .frame(height: geometry.size.height)
-                                .accessibilityHidden(true)
                         }
-                        .padding(.horizontal, 22)
-                        .padding(.vertical, 28)
-                    }
-                    .simultaneousGesture(
-                        DragGesture(minimumDistance: 8).onChanged { _ in autoScroll = false }
-                    )
 
-                    if !autoScroll, !model.visibleSegments.isEmpty {
-                        Button {
-                            autoScroll = true
-                            scrollToLive(using: proxy, animated: true)
-                        } label: {
-                            Label("Jump to Live", systemImage: "arrow.down.circle.fill")
-                                .font(.subheadline.weight(.bold))
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 10)
-                                .background(AppTheme.accent, in: Capsule())
-                                .foregroundStyle(.black)
-                        }
-                        .accessibilityHint("Returns to the current caption")
-                        .padding(16)
+                        Color.clear
+                            .frame(height: 1)
+                            .id(liveAnchorID)
+                            .accessibilityHidden(true)
                     }
+                    .padding(.horizontal, 22)
+                    .padding(.vertical, 28)
                 }
-                .onChange(of: model.visibleSegments.last?.id) { _, _ in
-                    guard autoScroll else { return }
-                    scrollToLive(using: proxy, animated: true)
+                .defaultScrollAnchor(.bottom)
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 8).onChanged { _ in autoScroll = false }
+                )
+
+                if !autoScroll, !model.visibleSegments.isEmpty {
+                    Button {
+                        autoScroll = true
+                        scrollToLive(using: proxy, animated: true)
+                    } label: {
+                        Label("Jump to Live", systemImage: "arrow.down.circle.fill")
+                            .font(.subheadline.weight(.bold))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(AppTheme.accent, in: Capsule())
+                            .foregroundStyle(.black)
+                    }
+                    .accessibilityHint("Returns to the current caption")
+                    .padding(16)
                 }
-                .onChange(of: model.captionFontSize) { _, _ in
-                    guard autoScroll else { return }
-                    scrollToLive(using: proxy, animated: false)
-                }
-                .onAppear {
-                    guard autoScroll else { return }
-                    scrollToLive(using: proxy, animated: false)
-                }
+            }
+            .onChange(of: model.visibleSegments.last?.id) { _, _ in
+                guard autoScroll else { return }
+                scrollToLive(using: proxy, animated: true)
+            }
+            .onChange(of: model.visibleSegments.last?.text) { _, _ in
+                guard autoScroll else { return }
+                // Keep a growing partial caption visible without animating on
+                // every recognition update. New segments still ease into view.
+                scrollToLive(using: proxy, animated: false)
+            }
+            .onChange(of: model.captionFontSize) { _, _ in
+                guard autoScroll else { return }
+                scrollToLive(using: proxy, animated: false)
+            }
+            .onAppear {
+                guard autoScroll else { return }
+                scrollToLive(using: proxy, animated: false)
             }
         }
     }
 
     private func scrollToLive(using proxy: ScrollViewProxy, animated: Bool) {
-        guard let latestSegmentID = model.visibleSegments.last?.id else { return }
-        let scroll = { proxy.scrollTo(latestSegmentID, anchor: .top) }
+        guard !model.visibleSegments.isEmpty else { return }
+        let scroll = { proxy.scrollTo(liveAnchorID, anchor: .bottom) }
 
         if animated {
             withAnimation(.easeOut(duration: 0.2), scroll)
@@ -151,12 +171,19 @@ struct LiveSessionView: View {
                     )
                 )
                 .foregroundStyle(AppTheme.primaryText)
-            Text("Start speaking near the connected microphones. Words will appear here.")
+            Text(listeningGuidance)
                 .font(.title3)
                 .foregroundStyle(AppTheme.secondaryText)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
+    }
+
+    private var listeningGuidance: String {
+        if model.audioCapture.routeSnapshot.inputKind == .bluetooth {
+            return "Face the person speaking while words appear here."
+        }
+        return "Start speaking near the connected microphones. Words will appear here."
     }
 
     private var liveControls: some View {

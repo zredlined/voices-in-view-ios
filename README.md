@@ -61,6 +61,9 @@ See [docs/privacy.md](docs/privacy.md) for the user-facing privacy policy.
 
 For setup help or troubleshooting, see [docs/support.md](docs/support.md).
 
+For the AirPods far-field capture workflow, safety constraints,
+and comparison protocol, see [docs/airpods-experiment.md](docs/airpods-experiment.md).
+
 ## License
 
 Voices in View is available under the [Apache License 2.0](LICENSE).

@@ -23,6 +23,22 @@ final class VoicesInViewUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Saved mode"].exists)
         XCTAssertTrue(app.buttons["Check Mic Levels"].exists)
         XCTAssertTrue(app.buttons["saved-transcripts"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["capture-profile-picker"].exists)
+        XCTAssertTrue(app.buttons["iPhone"].exists)
+        XCTAssertTrue(app.buttons["USB"].exists)
+        XCTAssertTrue(app.buttons["AirPods"].exists)
+    }
+
+    func testAirPodsProfileDoesNotGateCaptionStart() {
+        continueAfterFailure = false
+        let app = launchApp()
+        let farField = app.buttons["AirPods"]
+        XCTAssertTrue(farField.waitForExistence(timeout: 5))
+
+        farField.tap()
+
+        XCTAssertFalse(app.buttons["AirPods HQ"].exists)
+        XCTAssertTrue(app.buttons["Start Captions"].isEnabled)
     }
 
     func testGhostModeIsTheDefault() {

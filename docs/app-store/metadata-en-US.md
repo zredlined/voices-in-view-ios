@@ -2,7 +2,7 @@
 
 ## Promotional Text
 
-Private, on-device live captions for in-person conversations, with large, readable text and support for USB microphones such as DJI Mic Mini.
+Private, on-device live captions with large, readable text and your choice of iPhone, USB, or AirPods microphones.
 
 ## Description
 
@@ -20,9 +20,10 @@ Features:
 • Built-in iPhone microphone support
 • USB audio support, including tested use with DJI Mic Mini
 • Two-channel USB input mixed into one easy-to-follow conversation feed
+• Optional AirPods Far Field input for hands-free, head-directed listening
 • No accounts, ads, analytics, cloud transcription, or audio recordings
 
-Wearable wireless microphones can improve transcription in family gatherings and meetings by placing microphones closer to speakers. Additional microphone hardware is optional; Voices in View also works with the iPhone microphone.
+Choose the iPhone microphone for simple everyday use, a compatible USB microphone for flexible placement, or AirPods Far Field while wearing AirPods. Additional microphone hardware is optional.
 
 Live transcription availability depends on Apple’s on-device speech support for your iPhone. Voices in View currently supports US English and requires iOS 26 or later.
 
@@ -38,10 +39,18 @@ hearing,captions,transcription,accessibility,speech,conversation,offline,live,me
 
 ## Version and Copyright
 
-- Version: 1.0
+- Version: 1.1.0
 - Copyright: 2026 Alexander Watson
 - Routing App Coverage File: Leave blank
 
 ## Screenshots
 
 Upload the three PNG files in `screenshots/6.5-inch` in numeric order. They are 1284 × 2778 pixels, opaque, and match the dimensions requested by App Store Connect.
+
+## What’s New in 1.1.0
+
+• Choose between iPhone, USB, and AirPods microphone inputs
+• Use AirPods Far Field for hands-free, head-directed capture
+• Test microphone quality before starting captions
+• Scroll back through recent captions without losing your place, then jump back to live
+• Simpler Input and Caption Mode controls

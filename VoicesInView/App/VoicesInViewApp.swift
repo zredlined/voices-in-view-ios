@@ -18,7 +18,7 @@ struct VoicesInViewApp: App {
                     guard newPhase == .background else { return }
                     if model.isSessionActive {
                         Task { await model.stopCaptions() }
-                    } else if model.isTestingMicrophones {
+                    } else if model.isTestingMicrophones || model.isPreparingMicrophoneTest {
                         model.stopMicrophoneTest()
                     }
                 }
