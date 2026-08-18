@@ -2,7 +2,7 @@
 
 ## Promotional Text
 
-Private, on-device live captions with large, readable text and flexible iPhone, USB, and supported AirPods microphone options.
+Private, on-device live captions with support for iPhone, DJI Mic Mini 2.0, other compatible USB microphones, and AirPods.
 
 ## Suggested Subtitle
 
@@ -12,7 +12,7 @@ Private live captions
 
 Voices in View helps people who are hard of hearing follow in-person conversations with large, real-time captions on iPhone.
 
-Choose the microphone that fits the conversation: the nearby iPhone, a compatible USB microphone, or supported AirPods worn by the person reading captions.
+Choose the microphone that fits the conversation: the nearby iPhone, DJI Mic Mini 2.0 or another compatible USB microphone, or supported AirPods worn by the person reading captions.
 
 Use Ghost when captions should disappear after the conversation, or choose Save to keep finalized transcript text on this iPhone for later reading, sharing, or deletion.
 
@@ -25,7 +25,7 @@ Features:
 • Share saved transcripts through the iOS share sheet
 • A microphone test before starting captions
 • Built-in iPhone microphone support with no extra hardware
-• Compatible USB audio support, including DJI Mic Mini
+• Tested support for DJI Mic Mini 2.0 and compatible USB audio
 • Two-channel USB input mixed into one easy-to-follow conversation feed
 • AirPods Far Field for hands-free, head-directed microphone capture
 • Live scrolling that keeps recent context available
@@ -57,7 +57,7 @@ The 1.1.0 screenshot sets are ready in `screenshots/6.9-inch` and `screenshots/6
 
 ## What’s New in 1.1.0
 
-• Choose between iPhone, USB, and supported AirPods microphone inputs
+• Choose between iPhone, DJI Mic Mini 2.0 or other USB microphones, and supported AirPods
 • Use AirPods Far Field for hands-free, head-directed microphone capture
 • Test microphone levels before starting captions
 • Scroll back through recent captions without losing your place, then jump back to live
